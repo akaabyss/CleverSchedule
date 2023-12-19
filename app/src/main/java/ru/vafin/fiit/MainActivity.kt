@@ -46,33 +46,35 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ru.vafin.fiit.ui.theme.colorOfAllPair
+import ru.vafin.fiit.ui.theme.colorOfText
+import ru.vafin.fiit.ui.theme.colorOfThisPair
+import ru.vafin.fiit.ui.theme.mainColor
 import java.io.File
 import java.util.Calendar
 
-var d = MainActivity.DateTime()
+var d = DateTime()
+
 
 class MainActivity : ComponentActivity() {
-
-    private var fileBaseName = "database.txt"
-    private var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
+    var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
+    private var fileBaseName = "dataForUniversityApp.txt"
 
     //        getSubjectsFromText(fileBaseName)
     private val numberOfSemester = getNumberOfSemester()
-    private var fileName: String? = null
+
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
 
-    private var mainColor = Color(0xFF9FE778)
 
     //    Color(0xFFA50AE7)
-    private var colorOfThisPair = Color(0xFF9FE778)
-    private var colorOfAllPair = Color.LightGray
-    var colorOfText = Color.Black
+
 
     @SuppressLint("MutableCollectionMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        subjects = readData()
         setContent {
             val navController = rememberNavController()
 
@@ -105,7 +107,6 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
     @SuppressLint("MutableCollectionMutableState")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -129,8 +130,10 @@ class MainActivity : ComponentActivity() {
                     .padding(5.dp)
             )
             Button(onClick = {
-                subjects = getSubjectsFromText(context, text.split(";\n"))
+                subjects = getSubjectsFromListString(text.split("\n"))
                 sub = subjects
+                writeText(text)
+//                writeDataByMutableMap()
                 Toast.makeText(context, "Successful", Toast.LENGTH_LONG).show()
             }) {
                 Text(text = "update")
@@ -157,7 +160,7 @@ class MainActivity : ComponentActivity() {
     private fun getDayOfWeekByStringWithName(str: String): DayOfWeek {
         return when (str) {
             DayOfWeek.Monday.name -> DayOfWeek.Monday
-            "Tuesday" -> DayOfWeek.Tuesday
+            DayOfWeek.Tuesday.name -> DayOfWeek.Tuesday
             DayOfWeek.Wednesday.name -> DayOfWeek.Wednesday
             DayOfWeek.Thursday.name -> DayOfWeek.Thursday
             DayOfWeek.Friday.name -> DayOfWeek.Friday
@@ -174,48 +177,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun getSubjectsFromText(
-        context: Context,
+    private fun getStringWithNameByNumOrDen(numAndDen: NumAndDen): String {
+        return when (numAndDen) {
+            NumAndDen.Numerator -> "Числитель"
+            NumAndDen.Denominator -> "Знаменатель"
+            NumAndDen.Every -> "Всегда"
+        }
+    }
+
+    fun getSubjectsFromListString(
         selectedTextbyStrings: List<String>
     ): MutableMap<DayOfWeek, MutableList<Pair>>? {
-
-//        return mutableMapOf<DayOfWeek, MutableList<Pair>>(
-//
-//            DayOfWeek.Monday to mutableListOf(Pair()),
-//            DayOfWeek.Tuesday to mutableListOf(
-//                Pair(
-//                    "Структуры",
-//                    "314",
-//                    TimeOfPair(8, 0, 8, 45),
-//                    "Авсеева", NumAndDen.Every
-//                ),
-//                Pair(
-//                    "Структуры",
-//                    "314",
-//                    TimeOfPair(8, 0, 9, 45),
-//                    "Авсеева", NumAndDen.Every
-//                ),
-//                Pair(
-//                    "Структуры",
-//                    "314",
-//                    TimeOfPair(8, 0, 10, 45),
-//                    "Авсеева", NumAndDen.Every
-//                ),
-//                Pair(
-//                    "Структуры",
-//                    "314",
-//                    TimeOfPair(8, 0, 11, 45),
-//                    "Авсеева", NumAndDen.Every
-//                ),
-//            ),
-//            DayOfWeek.Wednesday to mutableListOf(Pair()),
-//            DayOfWeek.Thursday to mutableListOf(Pair()),
-//            DayOfWeek.Friday to mutableListOf(Pair()),
-//            DayOfWeek.Saturday to mutableListOf(Pair()),
-//            DayOfWeek.Sunday to mutableListOf(Pair()),
-//
-//            )
-
         try {
 //        val listString = readData(selectedText)
             var listString = selectedTextbyStrings
@@ -231,26 +203,24 @@ class MainActivity : ComponentActivity() {
                 DayOfWeek.Sunday to mutableListOf(),
 
                 )
-            Log.e("MyLog", "listStr.size = ${listString.size}")
             for (str in listString) {
-                val listByStrSplit = str.split(", ")
-                Log.e("MyLog", "listbysplit = $listByStrSplit")
+                val listByStrSplit = str.substring(0, str.lastIndex).split(", ")
+
                 val thisDay: DayOfWeek = getDayOfWeekByStringWithName(listByStrSplit[0])
-                Log.e("MyLog", "day = ${thisDay.name}")
-                Log.e("MyLog", "num of pair = ${listByStrSplit[3].toInt()}")
                 result[thisDay]?.add(
                     Pair(
+                        getDayOfWeekByStringWithName(listByStrSplit[0]),
                         listByStrSplit[1],
                         listByStrSplit[2],
-                        getTimeOfPairByNumberOfPair(listByStrSplit[3].toInt()),
+                        getTimeOfPairByStringWithNumberOrStringWith4Times(listByStrSplit[3]),
                         listByStrSplit[4],
                         getNumOrDenByStringWithName(listByStrSplit[5])
                     )
                 )
 
-                Log.e("MyLog", result.toString())
 
             }
+            Log.e("myLog", "getsubjectsFromListString = $result")
             return result
         } catch (e: Exception) {
             Log.e("MyLog", e.message.toString())
@@ -260,56 +230,6 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    @Composable
-    fun Screen2(
-        onClickToScreen1: () -> Unit,
-        onClickToScreen2: () -> Unit,
-    ) {
-        val context = LocalContext.current
-        Column(Modifier.fillMaxSize()) {
-            Button(onClick = {
-                try {
-//                    applicationContext.openFileOutput(fileName, Context.MODE_PRIVATE)
-//                        .use {
-//                            it.write("$username, $userbio".toByteArray())
-//                        }
-//
-//                    Toast.makeText(
-//                        applicationContext,
-//                        "Файл $fileName сохранён",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-                } catch (e: Exception) {
-                    Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-                }
-            }, modifier = Modifier.width(200.dp)) {
-                Text(text = "update")
-            }
-
-            Button(onClick = {
-//                textFromFile = File(applicationContext.filesDir, fileName)
-//                    .bufferedReader()
-//                    .use { it.readText(); }
-//                Toast.makeText(context, "OPen", Toast.LENGTH_LONG).show()
-//                Toast.makeText(context, textFromFile, Toast.LENGTH_LONG).show()
-//                textBool = true
-
-            }, modifier = Modifier.width(200.dp)) {
-                Text(text = "getData")
-            }
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                BottomBar(
-                    onClickToScreen1,
-                    onClickToScreen2,
-                    selected2 = true
-                )
-            }
-        }
-    }
 
     @Composable
     fun MainScreen(
@@ -333,6 +253,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(), backgroundColor = mainColor,
 
                 ) {
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -358,7 +279,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val thisfont = 20.sp
                     Text(
-                        text = if (d.weekOfYear == NumAndDen.Numerator) {
+                        text = if (d.weekOfYear == MainActivity.NumAndDen.Numerator) {
                             "Числитель"
                         } else {
                             "Знаменатель"
@@ -372,7 +293,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                val listik: MutableList<Pair>? = subjects?.get(datetime.dayOfWeek)
+                val listik: MutableList<MainActivity.Pair>? = subjects?.get(datetime.dayOfWeek)
                 if (listik != null) {
                     for (subject in listik) {
                         if (subject.timeOfPair.timeVnutri(datetime)) {
@@ -429,17 +350,37 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun String.fromStringToPairObject(): Pair {
+        var listByStrSplit = this.split(", ")
+        return Pair(
+            getDayOfWeekByStringWithName(listByStrSplit[0]),
+            listByStrSplit[1],
+            listByStrSplit[2],
+            getTimeOfPairByStringWithNumberOrStringWith4Times(listByStrSplit[3]),
+            listByStrSplit[4],
+            getNumOrDenByStringWithName(listByStrSplit[5])
+        )
+    }
+
     inner class Pair(
-        private var nameOfSubject: String = "",
-        private var numberOfAud: String = "",
-        var timeOfPair: TimeOfPair = TimeOfPair(),
-        var nameOfTeacher: String = "",
-        var numeratorAndDenominator: NumAndDen = NumAndDen.Every,
-    ) {
-//        Monday, Стр Дан, 504П, 4, Авсеева О.В, Числитель
+        var dayOfThisPair: DayOfWeek,
+        var nameOfSubject: String,
+        var numberOfAud: String,
+        var timeOfPair: TimeOfPair,
+        var nameOfTeacher: String,
+        var numeratorAndDenominator: NumAndDen,
+
+        ) {
+        //        Monday, Стр Дан, 504П, 4, Авсеева О.В, Числитель
         override fun toString(): String {
-            return "[$nameOfSubject, $numberOfAud, $timeOfPair, $nameOfTeacher, ${numeratorAndDenominator.name}]"
+            return "[$dayOfThisPair, $nameOfSubject, $numberOfAud, $timeOfPair, $nameOfTeacher, ${numeratorAndDenominator.name}]"
         }
+
+        fun toFileString(): String {
+            return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud,${timeOfPair.toFileString()}, " +
+                    "$nameOfTeacher, ${getStringWithNameByNumOrDen(numeratorAndDenominator)}"
+        }
+
 
         @Composable
         fun GetStringForSchedule(colorBack: Color) {
@@ -499,62 +440,37 @@ class MainActivity : ComponentActivity() {
         Sunday
     }
 
-    private fun getTimeOfPairByNumberOfPair(number: Int): TimeOfPair {
-        return when (number) {
-            1 -> TimeOfPair(8, 0, 9, 35)
-            2 -> TimeOfPair(9, 45, 11, 20)
-            3 -> TimeOfPair(11, 30, 13, 5)
-            4 -> TimeOfPair(13, 25, 15, 0)
-            5 -> TimeOfPair(15, 10, 16, 45)
-            6 -> TimeOfPair(16, 55, 18, 20)
-            7 -> TimeOfPair(18, 30, 20, 5)
-            else -> TimeOfPair(0, 0, 0, 0)
+    private fun getTimeOfPairByStringWithNumberOrStringWith4Times(str: String): TimeOfPair {
+        if (str.length == 1) {
+            return when (str.toInt()) {
+                1 -> TimeOfPair(8, 0, 9, 35)
+                2 -> TimeOfPair(9, 45, 11, 20)
+                3 -> TimeOfPair(11, 30, 13, 5)
+                4 -> TimeOfPair(13, 25, 15, 0)
+                5 -> TimeOfPair(15, 10, 16, 45)
+                6 -> TimeOfPair(16, 55, 18, 20)
+                7 -> TimeOfPair(18, 30, 20, 5)
+                else -> TimeOfPair(0, 0, 0, 0)
+            }
+        } else {
+            return str.stringToTimeOfPair()
         }
     }
 
-    class TimeOfPair(
-        var startHour: Int = 0,
-        private var startMinutes: Int = 0,
-        var endHour: Int = 0,
-        var endMinutes: Int = 0
-    ) {
-        override fun toString(): String {
-            return "$startHour:$startMinutes - $endHour:$endMinutes"
-        }
-        fun toFileString():String{
-            return "$startHour|$startMinutes|$endHour|$endMinutes"
-        }
-
-        fun getTime(): String {
-
-            return if (startHour < 10) {
-                " $startHour:"
-            } else {
-                "$startHour:"
-            } + if (startMinutes < 10) {
-                "0$startMinutes"
-            } else {
-                "$startMinutes"
-            } + "\n   -\n" + if (endHour < 10) {
-                " $endHour:"
-            } else {
-                "$endHour:"
-            } + if (endMinutes < 10) {
-                "0$endMinutes"
-            } else {
-                "$endMinutes"
-            }
-        }
-
-        fun timeVnutri(datetime: DateTime): Boolean {
-            if ((datetime.hour * 60 * 60 + datetime.minute * 60 + datetime.sec) in
-                (startHour * 60 * 60 + startMinutes * 60)..(endHour * 60 * 60 + endMinutes * 60)
-            ) {
-                return true
-            }
-            return false
-        }
+    fun String.stringToTimeOfPair(): TimeOfPair {
+        val twotimes = this.split("-")
+        val fortimes = listOf(
+            twotimes[0].split(";"),
+            twotimes[1].split(";"),
+        )
+        return TimeOfPair(
+            fortimes[0][0].toInt(),
+            fortimes[0][1].toInt(),
+            fortimes[1][0].toInt(),
+            fortimes[1][1].toInt()
+        )
     }
+
 
     enum class NumAndDen {
         Every,
@@ -562,67 +478,6 @@ class MainActivity : ComponentActivity() {
         Denominator,
     }
 
-    class DateTime {
-        var calendar: Calendar = Calendar.getInstance()
-        var hour = 0
-        var minute = 0
-        var day = 0
-        var month = 0
-        var year = 0
-        var sec = 0
-        var dayOfWeek: DayOfWeek? = null
-        var weekOfYear: NumAndDen = NumAndDen.Every
-
-        init {
-            init()
-        }
-
-        fun init() {
-            calendar = Calendar.getInstance()
-            hour = calendar.get(Calendar.HOUR_OF_DAY)
-            dayOfWeek = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-                2 -> DayOfWeek.Monday
-                3 -> DayOfWeek.Tuesday
-                4 -> DayOfWeek.Wednesday
-                5 -> DayOfWeek.Thursday
-                6 -> DayOfWeek.Friday
-                7 -> DayOfWeek.Saturday
-                else -> DayOfWeek.Sunday
-            }
-            minute = calendar.get(Calendar.MINUTE)
-            sec = calendar.get(Calendar.SECOND)
-            day = calendar.get(Calendar.DAY_OF_MONTH)
-            month = calendar.get(Calendar.MONTH) + 1 // добавляем 1, так как он начинается с 0
-            year = calendar.get(Calendar.YEAR)
-            weekOfYear = if (calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
-                NumAndDen.Denominator
-            } else {
-                NumAndDen.Numerator
-            }
-        }
-
-        fun getTimeString(): String {
-            calendar = Calendar.getInstance()
-            hour = calendar.get(Calendar.HOUR_OF_DAY)
-            minute = calendar.get(Calendar.MINUTE)
-            sec = calendar.get(Calendar.SECOND)
-            return if (hour < 10) {
-                "0$hour:"
-            } else {
-                "$hour:"
-            } + if (minute < 10) {
-                "0$minute:"
-            } else {
-                "$minute"
-            } + if (sec < 10) {
-                ":0$sec"
-            } else {
-                ":$sec"
-            }
-
-        }
-
-    }
 
     private fun getNumberOfSemester(): Int {
 //    var oneSemRange = listOf(8, 9, 10, 11, 12)
@@ -639,13 +494,48 @@ class MainActivity : ComponentActivity() {
         return (cource - 1) * 2 + semester
     }
 
+    //    private var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
+    fun subjectsToOneList() {
+        if (subjects != null) {
+            val daysOfWeek = listOf(
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Wednesday,
+                DayOfWeek.Thursday,
+                DayOfWeek.Friday,
+                DayOfWeek.Saturday,
+                DayOfWeek.Sunday
+            )
+        }
+    }
 
-    fun writeData() {
+    private fun writeText(text: String) {
+        val file = File(this.getExternalFilesDir(null), fileBaseName)
+        file.writeText(text)
+        Log.e("myLog", "writeText = $text")
+    }
+
+    fun writeDataByMutableMap() {
         try {
-            val file = File(this.getExternalFilesDir(null), "artur.txt")
-//            file.appendText("arturHello!")
-            file.writeText("Artur!")
-            Toast.makeText(this, "wrote to artur.txt", Toast.LENGTH_LONG).show()
+            val file = File(this.getExternalFilesDir(null), fileBaseName)
+            file.writeText("")
+            val daysOfWeek = listOf<DayOfWeek>(
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Wednesday,
+                DayOfWeek.Thursday,
+                DayOfWeek.Friday,
+                DayOfWeek.Saturday
+            )
+            for (day in daysOfWeek) {
+                val subjectsInThisDay = subjects?.get(day)
+                if (subjectsInThisDay != null) {
+                    for (subject in subjectsInThisDay) {
+                        file.appendText(subject.toFileString() + ";\n")
+                    }
+                }
+            }
+            Toast.makeText(this, "wrote to $fileBaseName", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR WRITING", Toast.LENGTH_LONG).show()
 //            Log.e("Artur", e.message ?: "")
@@ -653,16 +543,19 @@ class MainActivity : ComponentActivity() {
 
     }
 
-
-    fun readData(fileBaseNameArg: String = fileBaseName): List<String>? {
+    fun readData(): MutableMap<DayOfWeek, MutableList<Pair>>? {
         try {
-            val file = File(this.getExternalFilesDir(null), fileBaseNameArg)
-            val x = file.readLines()
+            val file = File(this.getExternalFilesDir(null), fileBaseName)
+            val listWithPairs = file.readLines()
+            Log.e("myLog", "readData = ${listWithPairs}")
+
             Toast.makeText(this, "read data", Toast.LENGTH_LONG).show()
-            return x
+
+            Log.e("myLog", "readData = ${subjects.toString()}")
+            return getSubjectsFromListString(listWithPairs)
+
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR WRITING", Toast.LENGTH_LONG).show()
-
         }
         return null
     }
