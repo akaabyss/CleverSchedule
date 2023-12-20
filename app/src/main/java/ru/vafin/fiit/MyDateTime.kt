@@ -2,7 +2,7 @@ package ru.vafin.fiit
 
 import java.util.Calendar
 
-class DateTime {
+class MyDateTime {
     var calendar: Calendar = Calendar.getInstance()
     var hour = 0
     var minute = 0
@@ -10,12 +10,16 @@ class DateTime {
     var month = 0
     var year = 0
     var sec = 0
-    var dayOfWeek: MainActivity.DayOfWeek? = null
-    var weekOfYear: MainActivity.NumAndDen = MainActivity.NumAndDen.Every
-
-    init {
-        init()
+    var dayOfWeek: MainActivity.DayOfWeek = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+        2 -> MainActivity.DayOfWeek.Monday
+        3 -> MainActivity.DayOfWeek.Tuesday
+        4 -> MainActivity.DayOfWeek.Wednesday
+        5 -> MainActivity.DayOfWeek.Thursday
+        6 -> MainActivity.DayOfWeek.Friday
+        7 -> MainActivity.DayOfWeek.Saturday
+        else -> MainActivity.DayOfWeek.Sunday
     }
+    var weekOfYear: MainActivity.NumAndDen = MainActivity.NumAndDen.Every
 
     fun init() {
         calendar = Calendar.getInstance()

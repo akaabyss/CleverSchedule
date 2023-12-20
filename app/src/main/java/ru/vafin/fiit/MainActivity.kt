@@ -68,12 +68,17 @@ import ru.vafin.fiit.ui.theme.colorOfText
 import ru.vafin.fiit.ui.theme.colorOfThisPair
 import ru.vafin.fiit.ui.theme.mainColor
 import java.io.File
+import java.time.LocalDateTime
 
-var d = DateTime()
+var d = MyDateTime()
 
 
 class MainActivity : ComponentActivity() {
-    private var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
+    private var lessons = getEmptyLessonsList()
+
+    val current = LocalDateTime.now()
+//    var h = LocalDateTime().se
+
     private var fileBaseName = "dataForUniversityApp.txt"
 
     private val screen1 = "screen_1"
@@ -91,12 +96,44 @@ class MainActivity : ComponentActivity() {
 
     //    Color(0xFFA50AE7)
 
+    private fun getEmptyLessonsList(): MutableList<MutableList<Lesson>> {
+        return mutableListOf<MutableList<Lesson>>(
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+        )
+    }
+
 
     @SuppressLint("MutableCollectionMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        subjects = readData()
+        lessons = readData()
+//        subjects = getSubjectsFromListString(
+//            ("Monday, МатАн, 323, 9:45-11:20, Украинский, Всегда;\n" +
+//                    "Monday, Экономика, moodle, 15:10-16:45, Дайнеко, Всегда;\n" +
+//                    "Monday, МатЛогика, moodle, 16:55-18:20, Аристова, Всегда;\n" +
+//                    "Tuesday, МатЛогика, 504П, 9:45-11:20, Аристова, Всегда;\n" +
+//                    "Tuesday, ООП, 407П, 11:30-13:5, Чернышов, Всегда;\n" +
+//                    "Tuesday, Англ, 404П, 15:10-16:45, Акулова, Всегда;\n" +
+//                    "Wednesday, МатАн, 319, 8:0-9:35, Черникова, Всегда;\n" +
+//                    "Wednesday, МатАн, 319, 9:45-11:20, Черникова, Всегда;\n" +
+//                    "Wednesday, МатАн, 323, 13:25-15:0, Украинский, Всегда;\n" +
+//                    "Thursday, Структуры, 502П, 11:30-13:5, Авсеева, Всегда;\n" +
+//                    "Thursday, Структуры, 214, 13:25-15:0, Авсеева, Числитель;\n" +
+//                    "Thursday, ООП, 502П, 13:25-15:0, Авсеева, Знаменатель;\n" +
+//                    "Thursday, Структуры, 226, 15:10-16:45, Муратова, Всегда;\n" +
+//                    "Friday, ООП, 319, 9:45-11:20, Чернышов, Всегда;\n" +
+//                    "Friday, Физра, Хользунова, 15:10-16:45, -, Всегда;\n" +
+//                    "Saturday, ТерВер, 319, 9:45-11:20, Новикова, Всегда;\n" +
+//                    "Saturday, ТерВер, 319, 11:30-13:5, Шишов, Всегда;").split("\n")
+//        )
+
         setContent {
             val navController = rememberNavController()
 
@@ -115,7 +152,7 @@ class MainActivity : ComponentActivity() {
                     })
                 }
                 composable(screen2) {
-                    ScreenWithFilePick({
+                    ScreenWithPickData({
                         navController.navigate(screen1)
                     }, {
                         navController.navigate(screen2)
@@ -149,7 +186,7 @@ class MainActivity : ComponentActivity() {
         onClickToScreen3: () -> Unit,
     ) {
         val subjectsMut by remember {
-            mutableStateOf(subjects)
+            mutableStateOf(lessons)
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -170,27 +207,23 @@ class MainActivity : ComponentActivity() {
                     .fillMaxWidth()
                     .weight(10f)
             ) {
-
                 for (day in daysOfWeek) {
-                    val thisDay = subjectsMut?.get(day)
-                    if (thisDay != null) {
-                        itemsIndexed(thisDay) { index, _ ->
-                            if (index == 0) {
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(mainColor),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Text(text = day.name, fontSize = 18.sp)
-                                }
+                    val thisDay = subjectsMut[day.value]
+                    itemsIndexed(thisDay) { index, _ ->
+                        if (index == 0) {
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(mainColor),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = day.name, fontSize = 18.sp)
                             }
-                            PairEditCard(
-                                day = day,
-                                index = index
-                            )
                         }
-
+                        PairEditCard(
+                            day = day,
+                            index = index
+                        )
                     }
                 }
             }
@@ -211,10 +244,10 @@ class MainActivity : ComponentActivity() {
             mutableStateOf(false)
         }
         val pair by remember {
-            mutableStateOf((subjects?.get(day))?.get(index) ?: emptyPair())
+            mutableStateOf(lessons[day.value][index])
         }
-        val timeOfPair by remember {
-            mutableStateOf(pair.timeOfPair)
+        val timeOfLesson by remember {
+            mutableStateOf(pair.timeOfLesson)
         }
         var textNameOfSubject by remember {
             mutableStateOf(pair.nameOfSubject)
@@ -256,7 +289,7 @@ class MainActivity : ComponentActivity() {
                         Text(text = textNameOfSubject, fontSize = thisFont1)
                         Text(text = textNameOfTeacher, fontSize = thisFont2)
                         Text(text = textNumberOfAud, fontSize = thisFont3)
-                        Text(text = timeOfPair.toString(), fontSize = thisFont4)
+                        Text(text = timeOfLesson.toString(), fontSize = thisFont4)
                     } else {
 //                        TextField(
 //                            value = pair.nameOfSubject,
@@ -300,7 +333,7 @@ class MainActivity : ComponentActivity() {
                                     mutableStateOf(false)
                                 }
                                 Text(
-                                    text = timeOfPair.startHour.toString(),
+                                    text = timeOfLesson.startHour.toString(),
                                     modifier = Modifier
                                         .padding(5.dp)
                                         .clickable { expanded = true },
@@ -315,7 +348,7 @@ class MainActivity : ComponentActivity() {
                                         Text(
                                             text = "$i", modifier = Modifier
                                                 .clickable {
-                                                    timeOfPair.startHour = i
+                                                    timeOfLesson.startHour = i
                                                     expanded = !expanded
                                                 }
                                                 .padding(
@@ -336,10 +369,10 @@ class MainActivity : ComponentActivity() {
                                     mutableStateOf(false)
                                 }
                                 Text(
-                                    text = if (timeOfPair.startMinutes < 10) {
-                                        "0${timeOfPair.startMinutes}"
+                                    text = if (timeOfLesson.startMinutes < 10) {
+                                        "0${timeOfLesson.startMinutes}"
                                     } else {
-                                        "${timeOfPair.startMinutes}"
+                                        "${timeOfLesson.startMinutes}"
                                     },
                                     modifier = Modifier
                                         .padding(5.dp)
@@ -356,7 +389,7 @@ class MainActivity : ComponentActivity() {
                                         Text(
                                             text = "$i", modifier = Modifier
                                                 .clickable {
-                                                    timeOfPair.startMinutes = i
+                                                    timeOfLesson.startMinutes = i
                                                     expanded = !expanded
                                                 }
                                                 .padding(
@@ -379,7 +412,7 @@ class MainActivity : ComponentActivity() {
                                     mutableStateOf(false)
                                 }
                                 Text(
-                                    text = timeOfPair.endHour.toString(),
+                                    text = timeOfLesson.endHour.toString(),
                                     modifier = Modifier
                                         .padding(5.dp)
                                         .clickable { expanded = true },
@@ -394,7 +427,7 @@ class MainActivity : ComponentActivity() {
                                         Text(
                                             text = "$i", modifier = Modifier
                                                 .clickable {
-                                                    timeOfPair.endHour = i
+                                                    timeOfLesson.endHour = i
                                                     expanded = !expanded
                                                 }
                                                 .padding(
@@ -415,10 +448,10 @@ class MainActivity : ComponentActivity() {
                                     mutableStateOf(false)
                                 }
                                 Text(
-                                    text = if (timeOfPair.endMinutes < 10) {
-                                        "0${timeOfPair.endMinutes}"
+                                    text = if (timeOfLesson.endMinutes < 10) {
+                                        "0${timeOfLesson.endMinutes}"
                                     } else {
-                                        "${timeOfPair.endMinutes}"
+                                        "${timeOfLesson.endMinutes}"
                                     },
                                     modifier = Modifier
                                         .padding(5.dp)
@@ -434,7 +467,7 @@ class MainActivity : ComponentActivity() {
                                         Text(
                                             text = "$i", modifier = Modifier
                                                 .clickable {
-                                                    timeOfPair.endMinutes = i
+                                                    timeOfLesson.endMinutes = i
                                                     expanded = !expanded
                                                 }
                                                 .padding(
@@ -468,7 +501,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MutableCollectionMutableState")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ScreenWithFilePick(
+    fun ScreenWithPickData(
         onClickToScreen1: () -> Unit,
         onClickToScreen2: () -> Unit,
         onClickToScreen3: () -> Unit,
@@ -476,12 +509,11 @@ class MainActivity : ComponentActivity() {
         LocalContext.current
         var text by remember { mutableStateOf("") }
         var sub by remember {
-            mutableStateOf(subjects)
+            mutableStateOf(lessons)
         }
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 10.dp),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -494,23 +526,20 @@ class MainActivity : ComponentActivity() {
                     value = text, onValueChange = { text = it },
                     modifier = Modifier
                         .padding(5.dp)
-                        .height(450.dp)
+                        .fillMaxWidth()
+                        .weight(10f)
                 )
-                Button(onClick = {
-                    subjects = getSubjectsFromListString(text.split("\n"))
-                    sub = subjects
+                Button(
+                    onClick = {
+                        lessons = getSubjectsFromListString(text.split("\n"))
+                        sub = lessons
 //                    writeText(text)
-                    writeDataByMutableMap()
+                        writeDataByMutableMap()
 
-                }) {
-                    Text(text = "update")
+                    }, enabled = text.isNotEmpty()
+                ) {
+                    Text(text = "update subjects")
                 }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom
-            ) {
                 BottomBar(
                     onClickToScreen1,
                     onClickToScreen2,
@@ -518,6 +547,13 @@ class MainActivity : ComponentActivity() {
                     selected2 = true
                 )
             }
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize(),
+//                verticalArrangement = Arrangement.Bottom
+//            ) {
+//
+//            }
 
 
         }
@@ -537,13 +573,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun emptyPair(): Pair {
-        return Pair(
-            DayOfWeek.Monday, "", "", TimeOfPair(),
-            "",
-            NumAndDen.Every
-        )
-    }
+//    private fun emptyPair(): Lesson {
+//        return Lesson(
+//            DayOfWeek.Monday, "", "", TimeOfLesson(),
+//            "",
+//            NumAndDen.Every
+//        )
+//    }
 
     private fun getNumOrDenByStringWithName(str: String): NumAndDen {
         return when (str) {
@@ -561,27 +597,37 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun MutableList<MutableList<Lesson>>.sortedLessons() {
+        for (day in daysOfWeek) {
+            val lessonsInThisDay = this[day.value]
+            if (lessonsInThisDay.size != 0) {
+//                subjects?.set(day, lessonsInThisDay?.sorted())
+                lessonsInThisDay.sort()
+                this[day.value] = lessonsInThisDay
+            }
+        }
+    }
+
     private fun getSubjectsFromListString(
-        selectedTextbyStrings: List<String>
-    ): MutableMap<DayOfWeek, MutableList<Pair>>? {
+        selectedTextByStrings: List<String>
+    ): MutableList<MutableList<Lesson>> {
+        var result = mutableListOf<MutableList<Lesson>>(
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+            mutableListOf<Lesson>(),
+        )
         try {
 
-            val result = mutableMapOf<DayOfWeek, MutableList<Pair>>(
 
-                DayOfWeek.Monday to mutableListOf(),
-                DayOfWeek.Tuesday to mutableListOf(),
-                DayOfWeek.Wednesday to mutableListOf(),
-                DayOfWeek.Thursday to mutableListOf(),
-                DayOfWeek.Friday to mutableListOf(),
-                DayOfWeek.Saturday to mutableListOf(),
-                DayOfWeek.Sunday to mutableListOf(),
-
-                )
-            for (str in selectedTextbyStrings) {
+            for (str in selectedTextByStrings) {
                 val listByStrSplit = str.substring(0, str.lastIndex).split(", ")
                 val thisDay: DayOfWeek = getDayOfWeekByStringWithName(listByStrSplit[0])
-                result[thisDay]?.add(
-                    Pair(
+                result[thisDay.value].add(
+                    Lesson(
                         getDayOfWeekByStringWithName(listByStrSplit[0]),
                         listByStrSplit[1],
                         listByStrSplit[2],
@@ -594,13 +640,11 @@ class MainActivity : ComponentActivity() {
 
             }
             Log.e("MyLog", "getsubjectsFromListString (этим будет subjects) = $result")
-            return result
         } catch (e: Exception) {
             Log.e("MyLog", "exception = ${e.message.toString()}")
-
         }
-        return null
-
+        result.sortedLessons()
+        return result
     }
 
 
@@ -613,7 +657,7 @@ class MainActivity : ComponentActivity() {
 
         var datetime by remember {
             mutableStateOf(
-                DateTime()
+                MyDateTime()
             )
         }
         LocalContext.current
@@ -636,12 +680,14 @@ class MainActivity : ComponentActivity() {
                     Image(
                         painter = painterResource(id = R.drawable.softpaw),
                         contentDescription = null,
-                        modifier = Modifier.clip(CircleShape).size(30.dp) //форма
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .size(30.dp) //форма
                     )
                     Text("FIIT61", fontSize = 22.sp)
                     Text(text = datetime.getTimeString(), fontSize = 22.sp)
                     IconButton(onClick = {
-                        datetime = DateTime()
+                        datetime = MyDateTime()
                     }) {
                         Icon(Icons.Filled.Autorenew, contentDescription = "Info")
                     }
@@ -673,8 +719,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                val listik: MutableList<Pair>? = subjects?.get(datetime.dayOfWeek)
-                if (listik?.size == 0) {
+                val listik: MutableList<Lesson> = lessons[datetime.dayOfWeek.value]
+                if (listik.size == 0) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -685,13 +731,19 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                if (listik != null) {
-                    for (subject in listik) {
-                        if (subject.timeOfPair.timeVnutri(datetime)) {
-                            subject.GetStringForSchedule(colorOfThisPair)
+                var needNext = true
+                if (listik.isNotEmpty()) {
+                    var nowIsPair = false
+                    for (indexOfSubject in 0..listik.lastIndex) {
+                        val thisLesson = listik[indexOfSubject]
+                        if (thisLesson.timeOfLesson.timeVnutri(datetime)) {
+                            thisLesson.GetStringForSchedule(colorOfThisPair)
+                            nowIsPair = true
                         } else {
-                            subject.GetStringForSchedule(colorOfAllPairs)
+                            thisLesson.GetStringForSchedule(colorOfAllPairs)
+                            needNext = true
                         }
+
                     }
                 }
             }
@@ -749,9 +801,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun String.fromStringToPairObject(): Pair {
+    fun String.fromStringToPairObject(): Lesson {
         val listByStrSplit = this.split(", ")
-        return Pair(
+        return Lesson(
             getDayOfWeekByStringWithName(listByStrSplit[0]),
             listByStrSplit[1],
             listByStrSplit[2],
@@ -761,108 +813,105 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    inner class Pair(
-        var dayOfThisPair: DayOfWeek,
-        var nameOfSubject: String,
-        var numberOfAud: String,
-        var timeOfPair: TimeOfPair,
-        var nameOfTeacher: String,
-        var numeratorAndDenominator: NumAndDen,
+    fun Lesson.toFileString(): String {
+        return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud, ${timeOfLesson.toFileString()}, " +
+                "$nameOfTeacher, ${getStringWithNameByNumOrDen(numeratorAndDenominator)};"
+    }
 
+    @Composable
+    fun Lesson.GetNextLessonForSchedule() {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = colorOfThisPair
+            )
         ) {
-        //        Monday, Стр Дан, 504П, 4, Авсеева О.В, Числитель
-        override fun toString(): String {
-            return "[$dayOfThisPair, $nameOfSubject, $numberOfAud, $timeOfPair, $nameOfTeacher, ${numeratorAndDenominator.name}]"
+            GetStringForSchedule(colorOfAllPairs)
         }
-
-        fun toFileString(): String {
-            return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud, ${timeOfPair.toFileString()}, " +
-                    "$nameOfTeacher, ${getStringWithNameByNumOrDen(numeratorAndDenominator)};"
-        }
+    }
 
 
-        @Composable
-        fun GetStringForSchedule(colorBack: Color) {
-            if (nameOfSubject != "") {
-                var maxLines by remember {
-                    mutableIntStateOf(1)
-                }
-                if (numeratorAndDenominator == d.weekOfYear || numeratorAndDenominator == NumAndDen.Every) {
-                    Row(
+    @Composable
+    fun Lesson.GetStringForSchedule(colorBack: Color) {
+        if (nameOfSubject != "") {
+            var maxLines by remember {
+                mutableIntStateOf(1)
+            }
+            if (numeratorAndDenominator == d.weekOfYear || numeratorAndDenominator == NumAndDen.Every) {
+                Row(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                        .background(colorBack),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Column(
                         modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth()
-                            .background(colorBack),
-                        horizontalArrangement = Arrangement.SpaceAround
+                            .width(55.dp)
+
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .width(55.dp)
-
-                        ) {
-                            Text(text = timeOfPair.getTime(), fontSize = 15.sp)
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Column(
-                            modifier = Modifier,
-
-                            )
-                        {
-                            Text(text = nameOfSubject, color = colorOfText, fontSize = 20.sp)
-                            Text(
-                                text = "$numberOfAud\nПрепод: $nameOfTeacher",
-                                color = colorOfText,
-                                maxLines = maxLines,
-                                fontSize = 17.sp
-                            )
-                        }
-                        IconButton(onClick = {
-                            maxLines = 4 - maxLines
-                        }) {
-                            Icon(Icons.Filled.Info, contentDescription = "Info")
-                        }
-
+                        Text(text = timeOfLesson.getTime(), fontSize = 15.sp)
                     }
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Column(
+                        modifier = Modifier,
+
+                        )
+                    {
+                        Text(text = nameOfSubject, color = colorOfText, fontSize = 20.sp)
+                        Text(
+                            text = "$numberOfAud\nПрепод: $nameOfTeacher",
+                            color = colorOfText,
+                            maxLines = maxLines,
+                            fontSize = 17.sp
+                        )
+                    }
+                    IconButton(onClick = {
+                        maxLines = 4 - maxLines
+                    }) {
+                        Icon(Icons.Filled.Info, contentDescription = "Info")
+                    }
+
                 }
             }
         }
     }
 
-
-    enum class DayOfWeek {
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday
+    enum class DayOfWeek(val value: Int) {
+        Monday(0),
+        Tuesday(1),
+        Wednesday(2),
+        Thursday(3),
+        Friday(4),
+        Saturday(5),
+        Sunday(6)
     }
 
-    private fun getTimeOfPairByStringWithNumberOrStringWith4Times(str: String): TimeOfPair {
+    private fun getTimeOfPairByStringWithNumberOrStringWith4Times(str: String): TimeOfLesson {
         return if (str.length == 1) {
             when (str.toInt()) {
-                1 -> TimeOfPair(8, 0, 9, 35)
-                2 -> TimeOfPair(9, 45, 11, 20)
-                3 -> TimeOfPair(11, 30, 13, 5)
-                4 -> TimeOfPair(13, 25, 15, 0)
-                5 -> TimeOfPair(15, 10, 16, 45)
-                6 -> TimeOfPair(16, 55, 18, 20)
-                7 -> TimeOfPair(18, 30, 20, 5)
-                else -> TimeOfPair(0, 0, 0, 0)
+                1 -> TimeOfLesson(8, 0, 9, 35)
+                2 -> TimeOfLesson(9, 45, 11, 20)
+                3 -> TimeOfLesson(11, 30, 13, 5)
+                4 -> TimeOfLesson(13, 25, 15, 0)
+                5 -> TimeOfLesson(15, 10, 16, 45)
+                6 -> TimeOfLesson(16, 55, 18, 20)
+                7 -> TimeOfLesson(18, 30, 20, 5)
+                else -> TimeOfLesson(0, 0, 0, 0)
             }
         } else {
             str.stringToTimeOfPair()
         }
     }
 
-    fun String.stringToTimeOfPair(): TimeOfPair {
+    fun String.stringToTimeOfPair(): TimeOfLesson {
         val twotimes = this.split("-")
         val fortimes = listOf(
             twotimes[0].split(":"),
             twotimes[1].split(":"),
         )
-        return TimeOfPair(
+        return TimeOfLesson(
             fortimes[0][0].toInt(),
             fortimes[0][1].toInt(),
             fortimes[1][0].toInt(),
@@ -912,8 +961,8 @@ class MainActivity : ComponentActivity() {
                 DayOfWeek.Saturday
             )
             for (day in daysOfWeek) {
-                val subjectsInThisDay = subjects?.get(day)
-                if (subjectsInThisDay != null) {
+                val subjectsInThisDay = lessons[day.value]
+                if (subjectsInThisDay.isNotEmpty()) {
                     for (subject in subjectsInThisDay) {
                         file.appendText(subject.toFileString() + "\n")
                     }
@@ -928,18 +977,17 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun readData(): MutableMap<DayOfWeek, MutableList<Pair>>? {
+    private fun readData(): MutableList<MutableList<Lesson>> {
         try {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             val listWithPairs = file.readLines()
             Log.e("MyLog", "readData = $listWithPairs")
-
             return getSubjectsFromListString(listWithPairs)
 
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR READING LOCAL DATABASE", Toast.LENGTH_LONG).show()
         }
-        return null
+        return getEmptyLessonsList()
     }
 
     override fun onDestroy() {
