@@ -1,14 +1,15 @@
 package ru.vafin.fiit
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,15 +18,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +49,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
@@ -51,7 +62,6 @@ import ru.vafin.fiit.ui.theme.colorOfText
 import ru.vafin.fiit.ui.theme.colorOfThisPair
 import ru.vafin.fiit.ui.theme.mainColor
 import java.io.File
-import java.util.Calendar
 
 var d = DateTime()
 
@@ -65,7 +75,16 @@ class MainActivity : ComponentActivity() {
 
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
-
+    private val screen3 = "screen_3"
+    val daysOfWeek = listOf(
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    )
 
     //    Color(0xFFA50AE7)
 
@@ -88,6 +107,8 @@ class MainActivity : ComponentActivity() {
                         navController.navigate(screen1)
                     }, {
                         navController.navigate(screen2)
+                    }, {
+                        navController.navigate(screen3)
                     })
                 }
                 composable(screen2) {
@@ -95,6 +116,17 @@ class MainActivity : ComponentActivity() {
                         navController.navigate(screen1)
                     }, {
                         navController.navigate(screen2)
+                    }, {
+                        navController.navigate(screen3)
+                    })
+                }
+                composable(screen3) {
+                    EditScreen({
+                        navController.navigate(screen1)
+                    }, {
+                        navController.navigate(screen2)
+                    }, {
+                        navController.navigate(screen3)
                     })
                 }
 
@@ -106,6 +138,288 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    @SuppressLint("MutableCollectionMutableState")
+    @Composable
+    fun EditScreen(
+        onClickToScreen1: () -> Unit,
+        onClickToScreen2: () -> Unit,
+        onClickToScreen3: () -> Unit,
+    ) {
+        var subjectsMut by remember {
+            mutableStateOf(subjects)
+        }
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                modifier = Modifier.fillMaxWidth(), backgroundColor = mainColor,
+
+                ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Редактировать данные", fontSize = 22.sp)
+                }
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(10f)
+            ) {
+
+                for (day in daysOfWeek) {
+                    val thisDay = subjectsMut?.get(day)
+                    if (thisDay != null) {
+                        itemsIndexed(thisDay) { index, pair ->
+                            if (index == 0) {
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(mainColor)
+                                ) {
+                                    Text(text = day.name)
+                                }
+                            }
+                            PairEditCard(
+                                day = day,
+                                index = index
+                            )
+                        }
+
+                    }
+                }
+            }
+            BottomBar(
+                onClickToScreen1,
+                onClickToScreen2,
+                onClickToScreen3,
+                selected3 = true
+            )
+        }
+
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun PairEditCard(day: DayOfWeek, index: Int) {
+//        inner class Pair(
+//            var dayOfThisPair: DayOfWeek,
+//            var nameOfSubject: String,
+//            var numberOfAud: String,
+//            var timeOfPair: TimeOfPair,
+//            var nameOfTeacher: String,
+//            var numeratorAndDenominator: NumAndDen,
+        var isEditing by remember {
+            mutableStateOf(false)
+        }
+        var pair by remember {
+            mutableStateOf((subjects?.get(day))?.get(index) ?: emptyPair())
+        }
+        var timeOfPair by remember {
+            mutableStateOf(pair.timeOfPair)
+        }
+        var textNameOfSubject by remember {
+            mutableStateOf(pair.nameOfSubject)
+        }
+        var textNameOfTeacher by remember {
+            mutableStateOf(pair.nameOfTeacher)
+        }
+        var textNumberOfAud by remember {
+            mutableStateOf(pair.numberOfAud)
+        }
+
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)
+        ) {
+            val thisFont1 = 17.sp
+            val thisFont2 = 15.sp
+            val thisFont3 = 17.sp
+            val thisFont4 = 15.sp
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .weight(1f)
+                ) {
+                    if (!isEditing) {
+//                        Text(text = pair.nameOfSubject, fontSize = thisFont1)
+                        Text(text = textNameOfSubject, fontSize = thisFont1)
+                        Text(text = textNameOfTeacher, fontSize = thisFont2)
+                        Text(text = pair.numberOfAud, fontSize = thisFont3)
+                        Text(text = pair.timeOfPair.toFileString(), fontSize = thisFont4)
+                    } else {
+//                        TextField(
+//                            value = pair.nameOfSubject,
+//                            onValueChange = { pair.nameOfSubject = it },
+//                            textStyle = TextStyle(fontSize = thisFont1)
+//                        )
+                        TextField(
+                            value = textNameOfSubject,
+                            onValueChange = {
+                                textNameOfSubject = it
+                                pair.nameOfSubject = it
+                            },
+                            textStyle = TextStyle(fontSize = thisFont1)
+                        )
+                        TextField(
+                            value = textNameOfTeacher,
+                            onValueChange = {
+                                textNameOfTeacher = it
+                                pair.nameOfTeacher = it
+                            },
+                            textStyle = TextStyle(fontSize = thisFont2)
+                        )
+                        TextField(
+                            value = textNumberOfAud,
+                            onValueChange = {
+                                textNumberOfAud = it
+                                pair.numberOfAud = it
+                            },
+                            textStyle = TextStyle(fontSize = thisFont3)
+                        )
+                        Row(horizontalArrangement = Arrangement.SpaceAround) {
+                            val thisFont = thisFont4
+                            Box {
+                                var expanded by remember {
+                                    mutableStateOf(false)
+                                }
+                                Text(
+                                    text = timeOfPair.startHour.toString(),
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                        .clickable { expanded = true },
+                                    fontSize = thisFont
+                                )
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    for (i in 1..23) {
+                                        Text(
+                                            text = " $i ", modifier = Modifier.clickable {
+                                                timeOfPair.startHour = i
+                                                expanded = !expanded
+                                            },
+                                            fontSize = thisFont
+                                        )
+                                    }
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = ":",
+                                    fontSize = thisFont
+                                )
+                                Box {
+                                    var expanded by remember {
+                                        mutableStateOf(false)
+                                    }
+                                    Text(
+                                        text = timeOfPair.startMinutes.toString(),
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .clickable { expanded = true },
+                                        fontSize = thisFont
+                                    )
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false }
+                                    ) {
+                                        for (i in 0..59) {
+                                            Text(
+                                                text = " $i ", modifier = Modifier.clickable {
+                                                    timeOfPair.startHour = i
+                                                    expanded = !expanded
+                                                },
+                                                fontSize = thisFont
+                                            )
+                                        }
+                                    }
+                                }
+                                Text(
+                                    text = " - ",
+                                    fontSize = thisFont
+                                )
+                                Box {
+                                    var expanded by remember {
+                                        mutableStateOf(false)
+                                    }
+                                    Text(
+                                        text = timeOfPair.endHour.toString(),
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .clickable { expanded = true },
+                                        fontSize = thisFont
+                                    )
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false }
+                                    ) {
+                                        for (i in 0..23) {
+                                            Text(
+                                                text = " $i ", modifier = Modifier.clickable {
+                                                    timeOfPair.startHour = i
+                                                    expanded = !expanded
+                                                },
+                                                fontSize = thisFont
+                                            )
+                                        }
+                                    }
+                                }
+                                Text(
+                                    text = ":",
+                                    fontSize = thisFont
+                                )
+                                Box {
+                                    var expanded by remember {
+                                        mutableStateOf(false)
+                                    }
+                                    Text(
+                                        text = timeOfPair.endMinutes.toString(),
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .clickable { expanded = true },
+                                        fontSize = thisFont
+                                    )
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false }
+                                    ) {
+                                        for (i in 0..59) {
+                                            Text(
+                                                text = " $i ", modifier = Modifier.clickable {
+                                                    timeOfPair.endMinutes = i
+                                                    expanded = !expanded
+                                                },
+                                                fontSize = thisFont
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+
+                }
+                IconButton(onClick = {
+                    isEditing = !isEditing
+                }) {
+                    if (!isEditing) {
+                        Icon(Icons.Default.Edit, contentDescription = "IconEdit")
+                    } else {
+                        Icon(Icons.Default.Done, contentDescription = "IconDone")
+                    }
+                }
+            }
+        }
+    }
 
     @SuppressLint("MutableCollectionMutableState")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -113,6 +427,7 @@ class MainActivity : ComponentActivity() {
     fun ScreenWithFilePick(
         onClickToScreen1: () -> Unit,
         onClickToScreen2: () -> Unit,
+        onClickToScreen3: () -> Unit,
     ) {
         val context = LocalContext.current
         var text by remember { mutableStateOf("") }
@@ -120,38 +435,47 @@ class MainActivity : ComponentActivity() {
             mutableStateOf(subjects)
         }
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextField(
-                value = text, onValueChange = { text = it }, modifier = Modifier
-                    .weight(1f)
-                    .padding(5.dp)
-            )
-            Button(onClick = {
-                subjects = getSubjectsFromListString(text.split("\n"))
-                sub = subjects
-                writeText(text)
-//                writeDataByMutableMap()
-                Toast.makeText(context, "Successful", Toast.LENGTH_LONG).show()
-            }) {
-                Text(text = "update")
-            }
-
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f),
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TextField(
+                    value = text, onValueChange = { text = it },
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .height(450.dp)
+                )
+                Button(onClick = {
+                    subjects = getSubjectsFromListString(text.split("\n"))
+                    sub = subjects
+                    writeText(text)
+//                writeDataByMutableMap()
+                    Toast.makeText(context, "Successful", Toast.LENGTH_LONG).show()
+                }) {
+                    Text(text = "update")
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Bottom
-            )
-            {
+            ) {
                 BottomBar(
                     onClickToScreen1,
                     onClickToScreen2,
+                    onClickToScreen3,
                     selected2 = true
                 )
             }
+
+
         }
 
     }
@@ -167,6 +491,14 @@ class MainActivity : ComponentActivity() {
             DayOfWeek.Saturday.name -> DayOfWeek.Saturday
             else -> DayOfWeek.Sunday
         }
+    }
+
+    private fun emptyPair(): Pair {
+        return Pair(
+            DayOfWeek.Monday, "", "", TimeOfPair(),
+            "",
+            NumAndDen.Every
+        )
     }
 
     private fun getNumOrDenByStringWithName(str: String): NumAndDen {
@@ -235,6 +567,7 @@ class MainActivity : ComponentActivity() {
     fun MainScreen(
         onClickToScreen1: () -> Unit,
         onClickToScreen2: () -> Unit,
+        onClickToScreen3: () -> Unit,
     ) {
 
         var datetime by remember {
@@ -271,6 +604,7 @@ class MainActivity : ComponentActivity() {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(1f)
 
             ) {
                 Row(
@@ -304,16 +638,12 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                BottomBar(
-                    onClickToScreen1,
-                    onClickToScreen2,
-                    selected1 = true
-                )
-            }
+            BottomBar(
+                onClickToScreen1,
+                onClickToScreen2,
+                onClickToScreen3,
+                selected1 = true
+            )
         }
 
     }
@@ -322,16 +652,19 @@ class MainActivity : ComponentActivity() {
     fun BottomBar(
         onClickToScreen1: () -> Unit,
         onClickToScreen2: () -> Unit,
+        onClickToScreen3: () -> Unit,
         selected1: Boolean = false,
         selected2: Boolean = false,
+        selected3: Boolean = false,
 
         ) {
         BottomNavigation(
-            backgroundColor = Color.White,
+            modifier = Modifier.fillMaxWidth(),
+            backgroundColor = mainColor,
             contentColor = Color.Black
         ) {
             BottomNavigationItem(
-                icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                icon = { Icon(Icons.Default.Home, contentDescription = "Icon1") },
                 selected = selected1,
                 onClick = {
                     onClickToScreen1()
@@ -340,12 +673,21 @@ class MainActivity : ComponentActivity() {
             )
 
             BottomNavigationItem(
-                icon = { Icon(Icons.Default.Settings, contentDescription = "Profile") },
+                icon = { Icon(Icons.Default.Settings, contentDescription = "Icon2") },
                 selected = selected2,
                 onClick = {
                     onClickToScreen2()
                 },
                 enabled = !selected2,
+            )
+
+            BottomNavigationItem(
+                icon = { Icon(Icons.Default.List, contentDescription = "Icon3") },
+                selected = selected3,
+                onClick = {
+                    onClickToScreen3()
+                },
+                enabled = !selected3,
             )
         }
     }

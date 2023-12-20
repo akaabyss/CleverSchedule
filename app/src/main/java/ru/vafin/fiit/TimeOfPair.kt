@@ -2,7 +2,7 @@ package ru.vafin.fiit
 
 class TimeOfPair(
     var startHour: Int = 0,
-    private var startMinutes: Int = 0,
+    var startMinutes: Int = 0,
     var endHour: Int = 0,
     var endMinutes: Int = 0
 ) {

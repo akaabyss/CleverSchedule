@@ -47,17 +47,17 @@ class DateTime {
         minute = calendar.get(Calendar.MINUTE)
         sec = calendar.get(Calendar.SECOND)
         return if (hour < 10) {
-            "0$hour:"
+            "0$hour"
         } else {
-            "$hour:"
-        } + if (minute < 10) {
-            "0$minute:"
+            "$hour"
+        } + ":" + if (minute < 10) {
+            "0$minute"
         } else {
             "$minute"
-        } + if (sec < 10) {
-            ":0$sec"
+        } + ":" + if (sec < 10) {
+            "0$sec"
         } else {
-            ":$sec"
+            "$sec"
         }
 
     }
