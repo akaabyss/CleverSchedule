@@ -34,12 +34,14 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,7 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ru.vafin.fiit.ui.theme.colorOfAllPair
+import ru.vafin.fiit.ui.theme.colorOfAllPairs
 import ru.vafin.fiit.ui.theme.colorOfText
 import ru.vafin.fiit.ui.theme.colorOfThisPair
 import ru.vafin.fiit.ui.theme.mainColor
@@ -67,16 +68,13 @@ var d = DateTime()
 
 
 class MainActivity : ComponentActivity() {
-    var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
+    private var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
     private var fileBaseName = "dataForUniversityApp.txt"
-
-    //        getSubjectsFromText(fileBaseName)
-    private val numberOfSemester = getNumberOfSemester()
 
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
     private val screen3 = "screen_3"
-    val daysOfWeek = listOf(
+    private val daysOfWeek = listOf(
         DayOfWeek.Monday,
         DayOfWeek.Tuesday,
         DayOfWeek.Wednesday,
@@ -145,7 +143,7 @@ class MainActivity : ComponentActivity() {
         onClickToScreen2: () -> Unit,
         onClickToScreen3: () -> Unit,
     ) {
-        var subjectsMut by remember {
+        val subjectsMut by remember {
             mutableStateOf(subjects)
         }
 
@@ -171,14 +169,15 @@ class MainActivity : ComponentActivity() {
                 for (day in daysOfWeek) {
                     val thisDay = subjectsMut?.get(day)
                     if (thisDay != null) {
-                        itemsIndexed(thisDay) { index, pair ->
+                        itemsIndexed(thisDay) { index, _ ->
                             if (index == 0) {
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
-                                        .background(mainColor)
+                                        .background(mainColor),
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
-                                    Text(text = day.name)
+                                    Text(text = day.name, fontSize = 18.sp)
                                 }
                             }
                             PairEditCard(
@@ -203,20 +202,13 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun PairEditCard(day: DayOfWeek, index: Int) {
-//        inner class Pair(
-//            var dayOfThisPair: DayOfWeek,
-//            var nameOfSubject: String,
-//            var numberOfAud: String,
-//            var timeOfPair: TimeOfPair,
-//            var nameOfTeacher: String,
-//            var numeratorAndDenominator: NumAndDen,
         var isEditing by remember {
             mutableStateOf(false)
         }
-        var pair by remember {
+        val pair by remember {
             mutableStateOf((subjects?.get(day))?.get(index) ?: emptyPair())
         }
-        var timeOfPair by remember {
+        val timeOfPair by remember {
             mutableStateOf(pair.timeOfPair)
         }
         var textNameOfSubject by remember {
@@ -233,13 +225,21 @@ class MainActivity : ComponentActivity() {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp)
+                .padding(5.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = colorOfAllPairs,
+            ),
         ) {
             val thisFont1 = 17.sp
             val thisFont2 = 15.sp
             val thisFont3 = 17.sp
             val thisFont4 = 15.sp
-
+            val thiExpandedFont1 = 19.sp
+            val thiExpandedFont2 = 17.sp
+            val thiExpandedFont3 = 17.sp
+            val thiExpandedFont4 = 19.sp
+            val verticalPaddingOfNumbersInDropMenu = 3.dp
+            val horizontalPaddingOfNumbersInDropMenu = 5.dp
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier
@@ -250,8 +250,8 @@ class MainActivity : ComponentActivity() {
 //                        Text(text = pair.nameOfSubject, fontSize = thisFont1)
                         Text(text = textNameOfSubject, fontSize = thisFont1)
                         Text(text = textNameOfTeacher, fontSize = thisFont2)
-                        Text(text = pair.numberOfAud, fontSize = thisFont3)
-                        Text(text = pair.timeOfPair.toFileString(), fontSize = thisFont4)
+                        Text(text = textNumberOfAud, fontSize = thisFont3)
+                        Text(text = timeOfPair.toString(), fontSize = thisFont4)
                     } else {
 //                        TextField(
 //                            value = pair.nameOfSubject,
@@ -264,7 +264,8 @@ class MainActivity : ComponentActivity() {
                                 textNameOfSubject = it
                                 pair.nameOfSubject = it
                             },
-                            textStyle = TextStyle(fontSize = thisFont1)
+                            textStyle = TextStyle(fontSize = thiExpandedFont1),
+                            colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
                         )
                         TextField(
                             value = textNameOfTeacher,
@@ -272,7 +273,8 @@ class MainActivity : ComponentActivity() {
                                 textNameOfTeacher = it
                                 pair.nameOfTeacher = it
                             },
-                            textStyle = TextStyle(fontSize = thisFont2)
+                            textStyle = TextStyle(fontSize = thiExpandedFont2),
+                            colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
                         )
                         TextField(
                             value = textNumberOfAud,
@@ -280,10 +282,14 @@ class MainActivity : ComponentActivity() {
                                 textNumberOfAud = it
                                 pair.numberOfAud = it
                             },
-                            textStyle = TextStyle(fontSize = thisFont3)
+                            textStyle = TextStyle(fontSize = thiExpandedFont3),
+                            colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
                         )
-                        Row(horizontalArrangement = Arrangement.SpaceAround) {
-                            val thisFont = thisFont4
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val thisFont = thiExpandedFont4
                             Box {
                                 var expanded by remember {
                                     mutableStateOf(false)
@@ -297,118 +303,151 @@ class MainActivity : ComponentActivity() {
                                 )
                                 DropdownMenu(
                                     expanded = expanded,
-                                    onDismissRequest = { expanded = false }
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.background(colorOfAllPairs),
                                 ) {
                                     for (i in 1..23) {
                                         Text(
-                                            text = " $i ", modifier = Modifier.clickable {
-                                                timeOfPair.startHour = i
-                                                expanded = !expanded
-                                            },
+                                            text = "$i", modifier = Modifier
+                                                .clickable {
+                                                    timeOfPair.startHour = i
+                                                    expanded = !expanded
+                                                }
+                                                .padding(
+                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+                                                    vertical = verticalPaddingOfNumbersInDropMenu
+                                                ),
                                             fontSize = thisFont
                                         )
                                     }
                                 }
                             }
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = ":",
-                                    fontSize = thisFont
-                                )
-                                Box {
-                                    var expanded by remember {
-                                        mutableStateOf(false)
-                                    }
-                                    Text(
-                                        text = timeOfPair.startMinutes.toString(),
-                                        modifier = Modifier
-                                            .padding(5.dp)
-                                            .clickable { expanded = true },
-                                        fontSize = thisFont
-                                    )
-                                    DropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false }
-                                    ) {
-                                        for (i in 0..59) {
-                                            Text(
-                                                text = " $i ", modifier = Modifier.clickable {
-                                                    timeOfPair.startHour = i
-                                                    expanded = !expanded
-                                                },
-                                                fontSize = thisFont
-                                            )
-                                        }
-                                    }
+                            Text(
+                                text = ":",
+                                fontSize = thisFont
+                            )
+                            Box {
+                                var expanded by remember {
+                                    mutableStateOf(false)
                                 }
                                 Text(
-                                    text = " - ",
+                                    text = if (timeOfPair.startMinutes < 10) {
+                                        "0${timeOfPair.startMinutes}"
+                                    } else {
+                                        "${timeOfPair.startMinutes}"
+                                    },
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                        .clickable { expanded = true },
                                     fontSize = thisFont
                                 )
-                                Box {
-                                    var expanded by remember {
-                                        mutableStateOf(false)
-                                    }
-                                    Text(
-                                        text = timeOfPair.endHour.toString(),
-                                        modifier = Modifier
-                                            .padding(5.dp)
-                                            .clickable { expanded = true },
-                                        fontSize = thisFont
-                                    )
-                                    DropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false }
-                                    ) {
-                                        for (i in 0..23) {
-                                            Text(
-                                                text = " $i ", modifier = Modifier.clickable {
-                                                    timeOfPair.startHour = i
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.background(colorOfAllPairs),
+                                ) {
+                                    for (i in 0..59) {
+
+                                        Text(
+                                            text = "$i", modifier = Modifier
+                                                .clickable {
+                                                    timeOfPair.startMinutes = i
                                                     expanded = !expanded
-                                                },
-                                                fontSize = thisFont
-                                            )
-                                        }
+                                                }
+                                                .padding(
+                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+                                                    vertical = verticalPaddingOfNumbersInDropMenu
+                                                ),
+                                            fontSize = thisFont
+                                        )
+
+
                                     }
                                 }
+                            }
+                            Text(
+                                text = " - ",
+                                fontSize = thisFont
+                            )
+                            Box {
+                                var expanded by remember {
+                                    mutableStateOf(false)
+                                }
                                 Text(
-                                    text = ":",
+                                    text = timeOfPair.endHour.toString(),
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                        .clickable { expanded = true },
                                     fontSize = thisFont
                                 )
-                                Box {
-                                    var expanded by remember {
-                                        mutableStateOf(false)
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.background(colorOfAllPairs),
+                                ) {
+                                    for (i in 0..23) {
+                                        Text(
+                                            text = "$i", modifier = Modifier
+                                                .clickable {
+                                                    timeOfPair.endHour = i
+                                                    expanded = !expanded
+                                                }
+                                                .padding(
+                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+                                                    vertical = verticalPaddingOfNumbersInDropMenu
+                                                ),
+                                            fontSize = thisFont
+                                        )
                                     }
-                                    Text(
-                                        text = timeOfPair.endMinutes.toString(),
-                                        modifier = Modifier
-                                            .padding(5.dp)
-                                            .clickable { expanded = true },
-                                        fontSize = thisFont
-                                    )
-                                    DropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false }
-                                    ) {
-                                        for (i in 0..59) {
-                                            Text(
-                                                text = " $i ", modifier = Modifier.clickable {
+                                }
+                            }
+                            Text(
+                                text = ":",
+                                fontSize = thisFont
+                            )
+                            Box {
+                                var expanded by remember {
+                                    mutableStateOf(false)
+                                }
+                                Text(
+                                    text = if (timeOfPair.endMinutes < 10) {
+                                        "0${timeOfPair.endMinutes}"
+                                    } else {
+                                        "${timeOfPair.endMinutes}"
+                                    },
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                        .clickable { expanded = true },
+                                    fontSize = thisFont
+                                )
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { },
+                                    modifier = Modifier.background(colorOfAllPairs),
+                                ) {
+                                    for (i in 0..59) {
+                                        Text(
+                                            text = "$i", modifier = Modifier
+                                                .clickable {
                                                     timeOfPair.endMinutes = i
                                                     expanded = !expanded
-                                                },
-                                                fontSize = thisFont
-                                            )
-                                        }
+                                                }
+                                                .padding(
+                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+                                                    vertical = verticalPaddingOfNumbersInDropMenu
+                                                ),
+                                            fontSize = thisFont
+                                        )
                                     }
                                 }
                             }
                         }
-
-
                     }
-
                 }
                 IconButton(onClick = {
+                    if (isEditing) {
+                        writeDataByMutableMap()
+                    }
                     isEditing = !isEditing
                 }) {
                     if (!isEditing) {
@@ -429,7 +468,7 @@ class MainActivity : ComponentActivity() {
         onClickToScreen2: () -> Unit,
         onClickToScreen3: () -> Unit,
     ) {
-        val context = LocalContext.current
+        LocalContext.current
         var text by remember { mutableStateOf("") }
         var sub by remember {
             mutableStateOf(subjects)
@@ -455,9 +494,9 @@ class MainActivity : ComponentActivity() {
                 Button(onClick = {
                     subjects = getSubjectsFromListString(text.split("\n"))
                     sub = subjects
-                    writeText(text)
-//                writeDataByMutableMap()
-                    Toast.makeText(context, "Successful", Toast.LENGTH_LONG).show()
+//                    writeText(text)
+                    writeDataByMutableMap()
+
                 }) {
                     Text(text = "update")
                 }
@@ -517,14 +556,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun getSubjectsFromListString(
+    private fun getSubjectsFromListString(
         selectedTextbyStrings: List<String>
     ): MutableMap<DayOfWeek, MutableList<Pair>>? {
         try {
-//        val listString = readData(selectedText)
-            var listString = selectedTextbyStrings
 
-            var result = mutableMapOf<DayOfWeek, MutableList<Pair>>(
+            val result = mutableMapOf<DayOfWeek, MutableList<Pair>>(
 
                 DayOfWeek.Monday to mutableListOf(),
                 DayOfWeek.Tuesday to mutableListOf(),
@@ -535,16 +572,15 @@ class MainActivity : ComponentActivity() {
                 DayOfWeek.Sunday to mutableListOf(),
 
                 )
-            for (str in listString) {
+            for (str in selectedTextbyStrings) {
                 val listByStrSplit = str.substring(0, str.lastIndex).split(", ")
-
                 val thisDay: DayOfWeek = getDayOfWeekByStringWithName(listByStrSplit[0])
                 result[thisDay]?.add(
                     Pair(
                         getDayOfWeekByStringWithName(listByStrSplit[0]),
                         listByStrSplit[1],
                         listByStrSplit[2],
-                        getTimeOfPairByStringWithNumberOrStringWith4Times(listByStrSplit[3]),
+                        listByStrSplit[3].stringToTimeOfPair(),
                         listByStrSplit[4],
                         getNumOrDenByStringWithName(listByStrSplit[5])
                     )
@@ -552,10 +588,10 @@ class MainActivity : ComponentActivity() {
 
 
             }
-            Log.e("myLog", "getsubjectsFromListString = $result")
+            Log.e("MyLog", "getsubjectsFromListString (этим будет subjects) = $result")
             return result
         } catch (e: Exception) {
-            Log.e("MyLog", e.message.toString())
+            Log.e("MyLog", "exception = ${e.message.toString()}")
 
         }
         return null
@@ -575,7 +611,7 @@ class MainActivity : ComponentActivity() {
                 DateTime()
             )
         }
-        val context = LocalContext.current
+        LocalContext.current
 
         Column(
             modifier = Modifier
@@ -613,7 +649,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val thisfont = 20.sp
                     Text(
-                        text = if (d.weekOfYear == MainActivity.NumAndDen.Numerator) {
+                        text = if (d.weekOfYear == NumAndDen.Numerator) {
                             "Числитель"
                         } else {
                             "Знаменатель"
@@ -627,13 +663,24 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                val listik: MutableList<MainActivity.Pair>? = subjects?.get(datetime.dayOfWeek)
+                val listik: MutableList<Pair>? = subjects?.get(datetime.dayOfWeek)
+                if (listik?.size == 0) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        for (i in 1..10) {
+                            Text(text = "Выходной?", fontSize = 17.sp)
+                            Spacer(modifier = Modifier.height(5.dp))
+                        }
+                    }
+                }
                 if (listik != null) {
                     for (subject in listik) {
                         if (subject.timeOfPair.timeVnutri(datetime)) {
                             subject.GetStringForSchedule(colorOfThisPair)
                         } else {
-                            subject.GetStringForSchedule(colorOfAllPair)
+                            subject.GetStringForSchedule(colorOfAllPairs)
                         }
                     }
                 }
@@ -693,7 +740,7 @@ class MainActivity : ComponentActivity() {
     }
 
     fun String.fromStringToPairObject(): Pair {
-        var listByStrSplit = this.split(", ")
+        val listByStrSplit = this.split(", ")
         return Pair(
             getDayOfWeekByStringWithName(listByStrSplit[0]),
             listByStrSplit[1],
@@ -719,8 +766,8 @@ class MainActivity : ComponentActivity() {
         }
 
         fun toFileString(): String {
-            return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud,${timeOfPair.toFileString()}, " +
-                    "$nameOfTeacher, ${getStringWithNameByNumOrDen(numeratorAndDenominator)}"
+            return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud, ${timeOfPair.toFileString()}, " +
+                    "$nameOfTeacher, ${getStringWithNameByNumOrDen(numeratorAndDenominator)};"
         }
 
 
@@ -783,8 +830,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun getTimeOfPairByStringWithNumberOrStringWith4Times(str: String): TimeOfPair {
-        if (str.length == 1) {
-            return when (str.toInt()) {
+        return if (str.length == 1) {
+            when (str.toInt()) {
                 1 -> TimeOfPair(8, 0, 9, 35)
                 2 -> TimeOfPair(9, 45, 11, 20)
                 3 -> TimeOfPair(11, 30, 13, 5)
@@ -795,15 +842,15 @@ class MainActivity : ComponentActivity() {
                 else -> TimeOfPair(0, 0, 0, 0)
             }
         } else {
-            return str.stringToTimeOfPair()
+            str.stringToTimeOfPair()
         }
     }
 
     fun String.stringToTimeOfPair(): TimeOfPair {
         val twotimes = this.split("-")
         val fortimes = listOf(
-            twotimes[0].split(";"),
-            twotimes[1].split(";"),
+            twotimes[0].split(":"),
+            twotimes[1].split(":"),
         )
         return TimeOfPair(
             fortimes[0][0].toInt(),
@@ -836,32 +883,17 @@ class MainActivity : ComponentActivity() {
         return (cource - 1) * 2 + semester
     }
 
-    //    private var subjects: MutableMap<DayOfWeek, MutableList<Pair>>? = null
-    fun subjectsToOneList() {
-        if (subjects != null) {
-            val daysOfWeek = listOf(
-                DayOfWeek.Monday,
-                DayOfWeek.Tuesday,
-                DayOfWeek.Wednesday,
-                DayOfWeek.Thursday,
-                DayOfWeek.Friday,
-                DayOfWeek.Saturday,
-                DayOfWeek.Sunday
-            )
-        }
-    }
+    //    private fun writeText(text: String) {
+//        val file = File(this.getExternalFilesDir(null), fileBaseName)
+//        file.writeText(text)
+//        Log.e("MyLog", "writeText = $text")
+//    }
 
-    private fun writeText(text: String) {
-        val file = File(this.getExternalFilesDir(null), fileBaseName)
-        file.writeText(text)
-        Log.e("myLog", "writeText = $text")
-    }
-
-    fun writeDataByMutableMap() {
+    private fun writeDataByMutableMap() {
         try {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             file.writeText("")
-            val daysOfWeek = listOf<DayOfWeek>(
+            val daysOfWeek = listOf(
                 DayOfWeek.Monday,
                 DayOfWeek.Tuesday,
                 DayOfWeek.Wednesday,
@@ -873,11 +905,12 @@ class MainActivity : ComponentActivity() {
                 val subjectsInThisDay = subjects?.get(day)
                 if (subjectsInThisDay != null) {
                     for (subject in subjectsInThisDay) {
-                        file.appendText(subject.toFileString() + ";\n")
+                        file.appendText(subject.toFileString() + "\n")
                     }
                 }
             }
-            Toast.makeText(this, "wrote to $fileBaseName", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "local database has updated", Toast.LENGTH_LONG).show()
+            Log.e("MyLog", "WriteDataByMutableMap")
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR WRITING", Toast.LENGTH_LONG).show()
 //            Log.e("Artur", e.message ?: "")
@@ -885,21 +918,24 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    fun readData(): MutableMap<DayOfWeek, MutableList<Pair>>? {
+    private fun readData(): MutableMap<DayOfWeek, MutableList<Pair>>? {
         try {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             val listWithPairs = file.readLines()
-            Log.e("myLog", "readData = ${listWithPairs}")
+            Log.e("MyLog", "readData = $listWithPairs")
 
-            Toast.makeText(this, "read data", Toast.LENGTH_LONG).show()
-
-            Log.e("myLog", "readData = ${subjects.toString()}")
             return getSubjectsFromListString(listWithPairs)
 
         } catch (e: Exception) {
-            Toast.makeText(this, "ERROR WRITING", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "ERROR READING LOCAL DATABASE", Toast.LENGTH_LONG).show()
         }
         return null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        writeDataByMutableMap()
+
     }
 }
 

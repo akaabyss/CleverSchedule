@@ -12,6 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val mainColor = Color(0xFF9FE778)
 var colorOfThisPair = Color(0xFF9FE778)
-val colorOfAllPair = Color.LightGray
+val colorOfAllPairs = Color.LightGray
 val colorOfText = Color.Black
 val Color.mainColor get() = Color(0xFF9FE778)

@@ -7,7 +7,15 @@ class TimeOfPair(
     var endMinutes: Int = 0
 ) {
     override fun toString(): String {
-        return "$startHour:$startMinutes - $endHour:$endMinutes"
+        return  "$startHour:"+ if (startMinutes < 10) {
+            "0$startMinutes"
+        } else {
+            "$startMinutes"
+        } + "-$endHour:"+ if (endMinutes < 10) {
+            "0$endMinutes"
+        } else {
+            "$endMinutes"
+        }
     }
 
     fun toFileString(): String {
