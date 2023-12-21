@@ -1,5 +1,9 @@
 package ru.vafin.fiit
 
+import java.time.LocalTime
+
+
+//SWITCH TO LOCALTIME.OF, LOCALTIME.OF
 class TimeOfLesson(
     var startHour: Int = 0,
     var startMinutes: Int = 0,
@@ -54,8 +58,8 @@ class TimeOfLesson(
         }
     }
 
-    fun timeVnutri(datetime: MyDateTime): Boolean {
-        if ((datetime.hour * 60 * 60 + datetime.minute * 60 + datetime.sec) in
+    fun timeVnutri(datetime: LocalTime): Boolean {
+        if ((datetime.hour * 60 * 60 + datetime.minute * 60 + datetime.second) in
             (startHour * 60 * 60 + startMinutes * 60)..(endHour * 60 * 60 + endMinutes * 60)
         ) {
             return true

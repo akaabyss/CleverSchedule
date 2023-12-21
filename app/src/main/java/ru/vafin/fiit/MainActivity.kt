@@ -3,6 +3,7 @@ package ru.vafin.fiit
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -68,33 +69,62 @@ import ru.vafin.fiit.ui.theme.colorOfText
 import ru.vafin.fiit.ui.theme.colorOfThisPair
 import ru.vafin.fiit.ui.theme.mainColor
 import java.io.File
+import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.Calendar
 
-var d = MyDateTime()
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
+var d = LocalDateTime.now()
+
+
+val calendar = Calendar.getInstance()
+val weekOfYear = if (calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
+    MainActivity.NumAndDen.Denominator
+} else {
+    MainActivity.NumAndDen.Numerator
+}
+
+fun LocalTime.getTimeString(): String {
+    return if (hour < 10) {
+        "0$hour"
+    } else {
+        "$hour"
+    } + ":" + if (minute < 10) {
+        "0$minute"
+    } else {
+        "$minute"
+    } + ":" + if (second < 10) {
+        "0$second"
+    } else {
+        "$second"
+    }
+
+}
 
 class MainActivity : ComponentActivity() {
     private var lessons = getEmptyLessonsList()
-
-    val current = LocalDateTime.now()
-//    var h = LocalDateTime().se
 
     private var fileBaseName = "dataForUniversityApp.txt"
 
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
     private val screen3 = "screen_3"
-    private val daysOfWeek = listOf(
-        DayOfWeek.Monday,
-        DayOfWeek.Tuesday,
-        DayOfWeek.Wednesday,
-        DayOfWeek.Thursday,
-        DayOfWeek.Friday,
-        DayOfWeek.Saturday,
-        DayOfWeek.Sunday
-    )
 
-    //    Color(0xFFA50AE7)
+    private val daysOfWeek = listOf(
+        DayOfWeek.MONDAY,
+        DayOfWeek.TUESDAY,
+        DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY,
+        DayOfWeek.FRIDAY,
+        DayOfWeek.SATURDAY,
+        DayOfWeek.SUNDAY
+    )
 
     private fun getEmptyLessonsList(): MutableList<MutableList<Lesson>> {
         return mutableListOf<MutableList<Lesson>>(
@@ -108,35 +138,14 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-
     @SuppressLint("MutableCollectionMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+
         lessons = readData()
-//        subjects = getSubjectsFromListString(
-//            ("Monday, МатАн, 323, 9:45-11:20, Украинский, Всегда;\n" +
-//                    "Monday, Экономика, moodle, 15:10-16:45, Дайнеко, Всегда;\n" +
-//                    "Monday, МатЛогика, moodle, 16:55-18:20, Аристова, Всегда;\n" +
-//                    "Tuesday, МатЛогика, 504П, 9:45-11:20, Аристова, Всегда;\n" +
-//                    "Tuesday, ООП, 407П, 11:30-13:5, Чернышов, Всегда;\n" +
-//                    "Tuesday, Англ, 404П, 15:10-16:45, Акулова, Всегда;\n" +
-//                    "Wednesday, МатАн, 319, 8:0-9:35, Черникова, Всегда;\n" +
-//                    "Wednesday, МатАн, 319, 9:45-11:20, Черникова, Всегда;\n" +
-//                    "Wednesday, МатАн, 323, 13:25-15:0, Украинский, Всегда;\n" +
-//                    "Thursday, Структуры, 502П, 11:30-13:5, Авсеева, Всегда;\n" +
-//                    "Thursday, Структуры, 214, 13:25-15:0, Авсеева, Числитель;\n" +
-//                    "Thursday, ООП, 502П, 13:25-15:0, Авсеева, Знаменатель;\n" +
-//                    "Thursday, Структуры, 226, 15:10-16:45, Муратова, Всегда;\n" +
-//                    "Friday, ООП, 319, 9:45-11:20, Чернышов, Всегда;\n" +
-//                    "Friday, Физра, Хользунова, 15:10-16:45, -, Всегда;\n" +
-//                    "Saturday, ТерВер, 319, 9:45-11:20, Новикова, Всегда;\n" +
-//                    "Saturday, ТерВер, 319, 11:30-13:5, Шишов, Всегда;").split("\n")
-//        )
 
         setContent {
             val navController = rememberNavController()
-
 
             NavHost(
                 navController = navController,
@@ -208,7 +217,7 @@ class MainActivity : ComponentActivity() {
                     .weight(10f)
             ) {
                 for (day in daysOfWeek) {
-                    val thisDay = subjectsMut[day.value]
+                    val thisDay = subjectsMut[day.value - 1]
                     itemsIndexed(thisDay) { index, _ ->
                         if (index == 0) {
                             Row(
@@ -244,7 +253,7 @@ class MainActivity : ComponentActivity() {
             mutableStateOf(false)
         }
         val pair by remember {
-            mutableStateOf(lessons[day.value][index])
+            mutableStateOf(lessons[day.value - 1][index])
         }
         val timeOfLesson by remember {
             mutableStateOf(pair.timeOfLesson)
@@ -323,6 +332,14 @@ class MainActivity : ComponentActivity() {
                             textStyle = TextStyle(fontSize = thiExpandedFont3),
                             colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
                         )
+                        var selectedHour by remember {
+                            mutableIntStateOf(0) // or use  mutableStateOf(0)
+                        }
+
+                        var selectedMinute by remember {
+                            mutableIntStateOf(0) // or use  mutableStateOf(0)
+                        }
+
                         Row(
                             horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
@@ -563,13 +580,20 @@ class MainActivity : ComponentActivity() {
 
     private fun getDayOfWeekByStringWithName(str: String): DayOfWeek {
         return when (str) {
-            DayOfWeek.Monday.name -> DayOfWeek.Monday
-            DayOfWeek.Tuesday.name -> DayOfWeek.Tuesday
-            DayOfWeek.Wednesday.name -> DayOfWeek.Wednesday
-            DayOfWeek.Thursday.name -> DayOfWeek.Thursday
-            DayOfWeek.Friday.name -> DayOfWeek.Friday
-            DayOfWeek.Saturday.name -> DayOfWeek.Saturday
-            else -> DayOfWeek.Sunday
+            DayOfWeek.MONDAY.name -> DayOfWeek.MONDAY
+            DayOfWeek.TUESDAY.name -> DayOfWeek.TUESDAY
+            DayOfWeek.WEDNESDAY.name -> DayOfWeek.WEDNESDAY
+            DayOfWeek.THURSDAY.name -> DayOfWeek.THURSDAY
+            DayOfWeek.FRIDAY.name -> DayOfWeek.FRIDAY
+            DayOfWeek.SATURDAY.name -> DayOfWeek.SATURDAY
+            else -> DayOfWeek.SUNDAY
+//            "Monday" -> DayOfWeek.MONDAY
+//            "Tuesday" -> DayOfWeek.TUESDAY
+//            "Wednesday" -> DayOfWeek.WEDNESDAY
+//            "Thursday" -> DayOfWeek.THURSDAY
+//            "Friday" -> DayOfWeek.FRIDAY
+//            "Saturday" -> DayOfWeek.SATURDAY
+//            else -> DayOfWeek.SUNDAY
         }
     }
 
@@ -599,11 +623,11 @@ class MainActivity : ComponentActivity() {
 
     private fun MutableList<MutableList<Lesson>>.sortedLessons() {
         for (day in daysOfWeek) {
-            val lessonsInThisDay = this[day.value]
+            val lessonsInThisDay = this[day.value - 1]
             if (lessonsInThisDay.size != 0) {
 //                subjects?.set(day, lessonsInThisDay?.sorted())
                 lessonsInThisDay.sort()
-                this[day.value] = lessonsInThisDay
+                this[day.value - 1] = lessonsInThisDay
             }
         }
     }
@@ -626,7 +650,7 @@ class MainActivity : ComponentActivity() {
             for (str in selectedTextByStrings) {
                 val listByStrSplit = str.substring(0, str.lastIndex).split(", ")
                 val thisDay: DayOfWeek = getDayOfWeekByStringWithName(listByStrSplit[0])
-                result[thisDay.value].add(
+                result[thisDay.value - 1].add(
                     Lesson(
                         getDayOfWeekByStringWithName(listByStrSplit[0]),
                         listByStrSplit[1],
@@ -644,6 +668,7 @@ class MainActivity : ComponentActivity() {
             Log.e("MyLog", "exception = ${e.message.toString()}")
         }
         result.sortedLessons()
+        Log.e("MyLog", "return result {str681}=  $result")
         return result
     }
 
@@ -657,7 +682,7 @@ class MainActivity : ComponentActivity() {
 
         var datetime by remember {
             mutableStateOf(
-                MyDateTime()
+                LocalTime.now()
             )
         }
         LocalContext.current
@@ -687,7 +712,7 @@ class MainActivity : ComponentActivity() {
                     Text("FIIT61", fontSize = 22.sp)
                     Text(text = datetime.getTimeString(), fontSize = 22.sp)
                     IconButton(onClick = {
-                        datetime = MyDateTime()
+                        datetime = LocalTime.now()
                     }) {
                         Icon(Icons.Filled.Autorenew, contentDescription = "Info")
                     }
@@ -705,7 +730,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val thisfont = 20.sp
                     Text(
-                        text = if (d.weekOfYear == NumAndDen.Numerator) {
+                        text = if (weekOfYear == NumAndDen.Numerator) {
                             "Числитель"
                         } else {
                             "Знаменатель"
@@ -713,13 +738,13 @@ class MainActivity : ComponentActivity() {
                         fontSize = thisfont
                     )
                     Text(text = "|", fontSize = thisfont)
-                    Text(text = "${datetime.dayOfWeek?.name}", fontSize = thisfont)
+                    Text(text = d.dayOfWeek.name, fontSize = thisfont)
 //                    Text(text = "|", fontSize = thisfont)
 //                    Text(text = "$numberOfSemester сем", fontSize = thisfont)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-                val listik: MutableList<Lesson> = lessons[datetime.dayOfWeek.value]
+                val listik: MutableList<Lesson> = lessons[d.dayOfWeek.value - 1]
                 if (listik.size == 0) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -838,7 +863,7 @@ class MainActivity : ComponentActivity() {
             var maxLines by remember {
                 mutableIntStateOf(1)
             }
-            if (numeratorAndDenominator == d.weekOfYear || numeratorAndDenominator == NumAndDen.Every) {
+            if (numeratorAndDenominator == weekOfYear || numeratorAndDenominator == NumAndDen.Every) {
                 Row(
                     modifier = Modifier
                         .padding(10.dp)
@@ -878,15 +903,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    enum class DayOfWeek(val value: Int) {
-        Monday(0),
-        Tuesday(1),
-        Wednesday(2),
-        Thursday(3),
-        Friday(4),
-        Saturday(5),
-        Sunday(6)
-    }
 
     private fun getTimeOfPairByStringWithNumberOrStringWith4Times(str: String): TimeOfLesson {
         return if (str.length == 1) {
@@ -932,7 +948,7 @@ class MainActivity : ComponentActivity() {
         val twoSemRange = listOf(2, 3, 4, 5, 6, 7, 8)
         var cource = d.year - 2022
         val semester: Int
-        if (d.month !in twoSemRange) {
+        if (d.month.value !in twoSemRange) {
             cource += 1
             semester = 1
         } else {
@@ -952,16 +968,9 @@ class MainActivity : ComponentActivity() {
         try {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             file.writeText("")
-            val daysOfWeek = listOf(
-                DayOfWeek.Monday,
-                DayOfWeek.Tuesday,
-                DayOfWeek.Wednesday,
-                DayOfWeek.Thursday,
-                DayOfWeek.Friday,
-                DayOfWeek.Saturday
-            )
+            Log.e("MyLog", "start = WriteDataByMutableMap")
             for (day in daysOfWeek) {
-                val subjectsInThisDay = lessons[day.value]
+                val subjectsInThisDay = lessons[day.value - 1]
                 if (subjectsInThisDay.isNotEmpty()) {
                     for (subject in subjectsInThisDay) {
                         file.appendText(subject.toFileString() + "\n")
@@ -969,7 +978,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             Toast.makeText(this, "local database has updated", Toast.LENGTH_LONG).show()
-            Log.e("MyLog", "WriteDataByMutableMap")
+            Log.e("MyLog", "end = WriteDataByMutableMap")
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR WRITING", Toast.LENGTH_LONG).show()
 //            Log.e("Artur", e.message ?: "")
@@ -990,10 +999,10 @@ class MainActivity : ComponentActivity() {
         return getEmptyLessonsList()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        writeDataByMutableMap()
-
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        writeDataByMutableMap()
+//
+//    }
 }
 
