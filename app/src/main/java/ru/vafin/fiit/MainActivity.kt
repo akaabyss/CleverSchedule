@@ -300,11 +300,6 @@ class MainActivity : ComponentActivity() {
                         Text(text = textNumberOfAud, fontSize = thisFont3)
                         Text(text = timeOfLesson.toString(), fontSize = thisFont4)
                     } else {
-//                        TextField(
-//                            value = pair.nameOfSubject,
-//                            onValueChange = { pair.nameOfSubject = it },
-//                            textStyle = TextStyle(fontSize = thisFont1)
-//                        )
                         TextField(
                             value = textNameOfSubject,
                             onValueChange = {
@@ -340,162 +335,168 @@ class MainActivity : ComponentActivity() {
                             mutableIntStateOf(0) // or use  mutableStateOf(0)
                         }
 
+//                        Row(
+//                            horizontalArrangement = Arrangement.SpaceAround,
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//                            val thisFont = thiExpandedFont4
+//                            Box {
+//                                var expanded by remember {
+//                                    mutableStateOf(false)
+//                                }
+//                                Text(
+//                                    text = timeOfLesson.startHour.toString(),
+//                                    modifier = Modifier
+//                                        .padding(5.dp)
+//                                        .clickable { expanded = true },
+//                                    fontSize = thisFont
+//                                )
+//                                DropdownMenu(
+//                                    expanded = expanded,
+//                                    onDismissRequest = { expanded = false },
+//                                    modifier = Modifier.background(colorOfAllPairs),
+//                                ) {
+//                                    for (i in 1..23) {
+//                                        Text(
+//                                            text = "$i", modifier = Modifier
+//                                                .clickable {
+//                                                    timeOfLesson.startHour = i
+//                                                    expanded = !expanded
+//                                                }
+//                                                .padding(
+//                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+//                                                    vertical = verticalPaddingOfNumbersInDropMenu
+//                                                ),
+//                                            fontSize = thisFont
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                            Text(
+//                                text = ":",
+//                                fontSize = thisFont
+//                            )
+//                            Box {
+//                                var expanded by remember {
+//                                    mutableStateOf(false)
+//                                }
+//                                Text(
+//                                    text = if (timeOfLesson.startMinutes < 10) {
+//                                        "0${timeOfLesson.startMinutes}"
+//                                    } else {
+//                                        "${timeOfLesson.startMinutes}"
+//                                    },
+//                                    modifier = Modifier
+//                                        .padding(5.dp)
+//                                        .clickable { expanded = true },
+//                                    fontSize = thisFont
+//                                )
+//                                DropdownMenu(
+//                                    expanded = expanded,
+//                                    onDismissRequest = { expanded = false },
+//                                    modifier = Modifier.background(colorOfAllPairs),
+//                                ) {
+//                                    for (i in 0..59) {
+//
+//                                        Text(
+//                                            text = "$i", modifier = Modifier
+//                                                .clickable {
+//                                                    timeOfLesson.startMinutes = i
+//                                                    expanded = !expanded
+//                                                }
+//                                                .padding(
+//                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+//                                                    vertical = verticalPaddingOfNumbersInDropMenu
+//                                                ),
+//                                            fontSize = thisFont
+//                                        )
+//
+//
+//                                    }
+//                                }
+//                            }
+//                            Text(
+//                                text = " - ",
+//                                fontSize = thisFont
+//                            )
+//                            Box {
+//                                var expanded by remember {
+//                                    mutableStateOf(false)
+//                                }
+//                                Text(
+//                                    text = timeOfLesson.endHour.toString(),
+//                                    modifier = Modifier
+//                                        .padding(5.dp)
+//                                        .clickable { expanded = true },
+//                                    fontSize = thisFont
+//                                )
+//                                DropdownMenu(
+//                                    expanded = expanded,
+//                                    onDismissRequest = { expanded = false },
+//                                    modifier = Modifier.background(colorOfAllPairs),
+//                                ) {
+//                                    for (i in 0..23) {
+//                                        Text(
+//                                            text = "$i", modifier = Modifier
+//                                                .clickable {
+//                                                    timeOfLesson.endHour = i
+//                                                    expanded = !expanded
+//                                                }
+//                                                .padding(
+//                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+//                                                    vertical = verticalPaddingOfNumbersInDropMenu
+//                                                ),
+//                                            fontSize = thisFont
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                            Text(
+//                                text = ":",
+//                                fontSize = thisFont
+//                            )
+//                            Box {
+//                                var expanded by remember {
+//                                    mutableStateOf(false)
+//                                }
+//                                Text(
+//                                    text = if (timeOfLesson.endMinutes < 10) {
+//                                        "0${timeOfLesson.endMinutes}"
+//                                    } else {
+//                                        "${timeOfLesson.endMinutes}"
+//                                    },
+//                                    modifier = Modifier
+//                                        .padding(5.dp)
+//                                        .clickable { expanded = true },
+//                                    fontSize = thisFont
+//                                )
+//                                DropdownMenu(
+//                                    expanded = expanded,
+//                                    onDismissRequest = { },
+//                                    modifier = Modifier.background(colorOfAllPairs),
+//                                ) {
+//                                    for (i in 0..59) {
+//                                        Text(
+//                                            text = "$i", modifier = Modifier
+//                                                .clickable {
+//                                                    timeOfLesson.endMinutes = i
+//                                                    expanded = !expanded
+//                                                }
+//                                                .padding(
+//                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
+//                                                    vertical = verticalPaddingOfNumbersInDropMenu
+//                                                ),
+//                                            fontSize = thisFont
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
                         Row(
                             horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val thisFont = thiExpandedFont4
-                            Box {
-                                var expanded by remember {
-                                    mutableStateOf(false)
-                                }
-                                Text(
-                                    text = timeOfLesson.startHour.toString(),
-                                    modifier = Modifier
-                                        .padding(5.dp)
-                                        .clickable { expanded = true },
-                                    fontSize = thisFont
-                                )
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    modifier = Modifier.background(colorOfAllPairs),
-                                ) {
-                                    for (i in 1..23) {
-                                        Text(
-                                            text = "$i", modifier = Modifier
-                                                .clickable {
-                                                    timeOfLesson.startHour = i
-                                                    expanded = !expanded
-                                                }
-                                                .padding(
-                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
-                                                    vertical = verticalPaddingOfNumbersInDropMenu
-                                                ),
-                                            fontSize = thisFont
-                                        )
-                                    }
-                                }
-                            }
-                            Text(
-                                text = ":",
-                                fontSize = thisFont
-                            )
-                            Box {
-                                var expanded by remember {
-                                    mutableStateOf(false)
-                                }
-                                Text(
-                                    text = if (timeOfLesson.startMinutes < 10) {
-                                        "0${timeOfLesson.startMinutes}"
-                                    } else {
-                                        "${timeOfLesson.startMinutes}"
-                                    },
-                                    modifier = Modifier
-                                        .padding(5.dp)
-                                        .clickable { expanded = true },
-                                    fontSize = thisFont
-                                )
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    modifier = Modifier.background(colorOfAllPairs),
-                                ) {
-                                    for (i in 0..59) {
-
-                                        Text(
-                                            text = "$i", modifier = Modifier
-                                                .clickable {
-                                                    timeOfLesson.startMinutes = i
-                                                    expanded = !expanded
-                                                }
-                                                .padding(
-                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
-                                                    vertical = verticalPaddingOfNumbersInDropMenu
-                                                ),
-                                            fontSize = thisFont
-                                        )
-
-
-                                    }
-                                }
-                            }
-                            Text(
-                                text = " - ",
-                                fontSize = thisFont
-                            )
-                            Box {
-                                var expanded by remember {
-                                    mutableStateOf(false)
-                                }
-                                Text(
-                                    text = timeOfLesson.endHour.toString(),
-                                    modifier = Modifier
-                                        .padding(5.dp)
-                                        .clickable { expanded = true },
-                                    fontSize = thisFont
-                                )
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    modifier = Modifier.background(colorOfAllPairs),
-                                ) {
-                                    for (i in 0..23) {
-                                        Text(
-                                            text = "$i", modifier = Modifier
-                                                .clickable {
-                                                    timeOfLesson.endHour = i
-                                                    expanded = !expanded
-                                                }
-                                                .padding(
-                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
-                                                    vertical = verticalPaddingOfNumbersInDropMenu
-                                                ),
-                                            fontSize = thisFont
-                                        )
-                                    }
-                                }
-                            }
-                            Text(
-                                text = ":",
-                                fontSize = thisFont
-                            )
-                            Box {
-                                var expanded by remember {
-                                    mutableStateOf(false)
-                                }
-                                Text(
-                                    text = if (timeOfLesson.endMinutes < 10) {
-                                        "0${timeOfLesson.endMinutes}"
-                                    } else {
-                                        "${timeOfLesson.endMinutes}"
-                                    },
-                                    modifier = Modifier
-                                        .padding(5.dp)
-                                        .clickable { expanded = true },
-                                    fontSize = thisFont
-                                )
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { },
-                                    modifier = Modifier.background(colorOfAllPairs),
-                                ) {
-                                    for (i in 0..59) {
-                                        Text(
-                                            text = "$i", modifier = Modifier
-                                                .clickable {
-                                                    timeOfLesson.endMinutes = i
-                                                    expanded = !expanded
-                                                }
-                                                .padding(
-                                                    horizontal = horizontalPaddingOfNumbersInDropMenu,
-                                                    vertical = verticalPaddingOfNumbersInDropMenu
-                                                ),
-                                            fontSize = thisFont
-                                        )
-                                    }
-                                }
-                            }
+                            Text(text = timeOfLesson.toFileString())
                         }
                     }
                 }
@@ -564,17 +565,7 @@ class MainActivity : ComponentActivity() {
                     selected2 = true
                 )
             }
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxSize(),
-//                verticalArrangement = Arrangement.Bottom
-//            ) {
-//
-//            }
-
-
         }
-
     }
 
 
@@ -587,13 +578,7 @@ class MainActivity : ComponentActivity() {
             DayOfWeek.FRIDAY.name -> DayOfWeek.FRIDAY
             DayOfWeek.SATURDAY.name -> DayOfWeek.SATURDAY
             else -> DayOfWeek.SUNDAY
-//            "Monday" -> DayOfWeek.MONDAY
-//            "Tuesday" -> DayOfWeek.TUESDAY
-//            "Wednesday" -> DayOfWeek.WEDNESDAY
-//            "Thursday" -> DayOfWeek.THURSDAY
-//            "Friday" -> DayOfWeek.FRIDAY
-//            "Saturday" -> DayOfWeek.SATURDAY
-//            else -> DayOfWeek.SUNDAY
+
         }
     }
 
@@ -838,7 +823,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    fun Lesson.toFileString(): String {
+    private fun Lesson.toFileString(): String {
         return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud, ${timeOfLesson.toFileString()}, " +
                 "$nameOfTeacher, ${getStringWithNameByNumOrDen(numeratorAndDenominator)};"
     }
@@ -991,8 +976,27 @@ class MainActivity : ComponentActivity() {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             val listWithPairs = file.readLines()
             Log.e("MyLog", "readData = $listWithPairs")
-            return getSubjectsFromListString(listWithPairs)
-
+//            return getSubjectsFromListString(listWithPairs)
+            return getSubjectsFromListString(
+                ("MONDAY, МатАн, 323, 9:45-11:20, Украинский, Всегда;\n" +
+                        "MONDAY, Экономика, moodle, 15:10-16:45, Дайнеко, Всегда;\n" +
+                        "MONDAY, МатЛогика, moodle, 16:55-18:20, Аристова, Всегда;\n" +
+                        "TUESDAY, МатЛогика, 504П, 9:45-11:20, Аристова, Всегда;\n" +
+                        "TUESDAY, ООП, 407П, 11:30-13:5, Чернышов, Всегда;\n" +
+                        "TUESDAY, Англ, 404П, 15:10-16:45, Акулова, Всегда;\n" +
+                        "WEDNESDAY, МатАн, 319, 8:0-9:35, Черникова, Всегда;\n" +
+                        "WEDNESDAY, МатАн, 319, 9:45-11:20, Черникова, Всегда;\n" +
+                        "WEDNESDAY, МатАн, 323, 13:25-15:0, Украинский, Всегда;\n" +
+                        "THURSDAY, Структуры, 502П, 11:30-13:5, Авсеева, Всегда;\n" +
+                        "THURSDAY, Структуры, 214, 13:25-15:0, Авсеева, Числитель;\n" +
+                        "THURSDAY, ООП, 502П, 13:25-15:0, Авсеева, Знаменатель;\n" +
+                        "THURSDAY, Структуры, 216, 15:10-16:45, Авсеева, Знаменатель;\n" +
+                        "THURSDAY, Структуры, 226, 16:55-18:30, Муратова, Числитель;\n" +
+                        "FRIDAY, ООП, 319, 9:45-11:20, Чернышов, Всегда;\n" +
+                        "FRIDAY, Физра, Хользунова, 15:10-16:45, -, Всегда;\n" +
+                        "SARURDAY, ТерВер, 319, 9:45-11:20, Новикова, Всегда;\n" +
+                        "SARURDAY, ТерВер, 319, 11:30-13:5, Шишов, Всегда;").split("\n")
+            )
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR READING LOCAL DATABASE", Toast.LENGTH_LONG).show()
         }
