@@ -2,77 +2,11 @@ package ru.vafin.fiit
 
 import java.time.LocalTime
 
-
-//SWITCH TO LOCALTIME.OF, LOCALTIME.OF
-//class TimeOfLessonOLD(
-//    var startHour: Int = 0,
-//    var startMinutes: Int = 0,
-//    var endHour: Int = 0,
-//    var endMinutes: Int = 0
-//) : Comparable<TimeOfLesson> {
-//    override fun compareTo(other: TimeOfLesson): Int {
-//        if (startHour - other.startHour == 0) {
-//            if (startMinutes - other.startMinutes == 0) {
-//                return 0
-//            }
-//            return startMinutes - other.startMinutes
-//        }
-//        return startHour - other.startHour
-//    }
-//
-//    override fun toString(): String {
-//        return "$startHour:" + if (startMinutes < 10) {
-//            "0$startMinutes"
-//        } else {
-//            "$startMinutes"
-//        } + "-$endHour:" + if (endMinutes < 10) {
-//            "0$endMinutes"
-//        } else {
-//            "$endMinutes"
-//        }
-//    }
-//
-//
-//    fun toFileString(): String {
-//        return "$startHour:$startMinutes-$endHour:$endMinutes"
-//    }
-//
-//    fun getTime(): String {
-//
-//        return if (startHour < 10) {
-//            " $startHour:"
-//        } else {
-//            "$startHour:"
-//        } + if (startMinutes < 10) {
-//            "0$startMinutes"
-//        } else {
-//            "$startMinutes"
-//        } + "\n   -\n" + if (endHour < 10) {
-//            " $endHour:"
-//        } else {
-//            "$endHour:"
-//        } + if (endMinutes < 10) {
-//            "0$endMinutes"
-//        } else {
-//            "$endMinutes"
-//        }
-//    }
-//
-//    fun timeVnutri(datetime: LocalTime): Boolean {
-//        if ((datetime.hour * 60 * 60 + datetime.minute * 60 + datetime.second) in
-//            (startHour * 60 * 60 + startMinutes * 60)..(endHour * 60 * 60 + endMinutes * 60)
-//        ) {
-//            return true
-//        }
-//        return false
-//    }
-//}
-
 class TimeOfLesson(
-    startTime: Int = 0, 
+    startTime: Int = 0,
     startMinute: Int = 0,
     endTime: Int = 0,
-    endMinute: Int = 0
+    endMinute: Int = 0,
 ) : Comparable<TimeOfLesson> {
     var startTime: LocalTime = LocalTime.of(startTime, startMinute)
     var endTime: LocalTime = LocalTime.of(endTime, endMinute)
@@ -91,7 +25,7 @@ class TimeOfLesson(
             "0${startTime.minute}"
         } else {
             "${startTime.minute}"
-        } + "-endTime.hour:" + if (endTime.minute < 10) {
+        } + "-${endTime.hour}:" + if (endTime.minute < 10) {
             "0${endTime.minute}"
         } else {
             "${endTime.minute}"
@@ -100,15 +34,15 @@ class TimeOfLesson(
 
 
     fun toFileString(): String {
-        return "${startTime.minute}:${startTime.minute}-${endTime.hour}:${endTime.minute}s"
+        return "${startTime.hour}:${startTime.minute}-${endTime.hour}:${endTime.minute}"
     }
 
     fun getTime(): String {
 
         return if (startTime.hour < 10) {
-            " ${startTime.minute}:"
+            " ${startTime.hour}:"
         } else {
-            "${startTime.minute}:"
+            "${startTime.hour}:"
         } + if (startTime.minute < 10) {
             "0${startTime.minute}"
         } else {
@@ -118,9 +52,9 @@ class TimeOfLesson(
         } else {
             "${endTime.hour}:"
         } + if (endTime.minute < 10) {
-            "0${endTime.minute}s"
+            "0${endTime.minute}"
         } else {
-            "${endTime.minute}s"
+            "${endTime.minute}"
         }
     }
 
@@ -131,5 +65,58 @@ class TimeOfLesson(
             return true
         }
         return false
+    }
+}
+
+fun LocalTime.toShortString(): String {
+    return if (hour < 10) {
+        " ${hour}:"
+    } else {
+        "${hour}:"
+    } + if (minute < 10) {
+        "0${minute}"
+    } else {
+        "$minute"
+    }
+}
+
+fun String.stringToTimeOfPair(): TimeOfLesson {
+    val twoTimes = this.split("-")
+    val forTimes = listOf(
+        twoTimes[0].split(":"),
+        twoTimes[1].split(":"),
+    )
+    return TimeOfLesson(
+        forTimes[0][0].toInt(),
+        forTimes[0][1].toInt(),
+        forTimes[1][0].toInt(),
+        forTimes[1][1].toInt()
+    )
+}
+
+fun getTimeOfLessonByStringWithNumberOrStringWith4Times(str: String): TimeOfLesson {
+    return if (str.length == 1) {
+        when (str.toInt()) {
+            1 -> TimeOfLesson(8, 0, 9, 35)
+            2 -> TimeOfLesson(9, 45, 11, 20)
+            3 -> TimeOfLesson(11, 30, 13, 5)
+            4 -> TimeOfLesson(13, 25, 15, 0)
+            5 -> TimeOfLesson(15, 10, 16, 45)
+            6 -> TimeOfLesson(16, 55, 18, 20)
+            7 -> TimeOfLesson(18, 30, 20, 5)
+            else -> TimeOfLesson(0, 0, 0, 0)
+        }
+    } else {
+        str.stringToTimeOfPair()
+    }
+}
+fun MutableList<MutableList<Lesson>>.sortedLessons() {
+    for (day in daysOfWeek) {
+        val lessonsInThisDay = this[day.value - 1]
+        if (lessonsInThisDay.size != 0) {
+//                subjects?.set(day, lessonsInThisDay?.sorted())
+            lessonsInThisDay.sort()
+            this[day.value - 1] = lessonsInThisDay
+        }
     }
 }
