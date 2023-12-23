@@ -11,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -73,7 +74,7 @@ import java.util.Calendar
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 
-var d = LocalDateTime.now()
+var localDateTime = LocalDateTime.now()
 
 object FontSize {
     val bitText = 20.sp
@@ -98,7 +99,13 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MutableCollectionMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        Toast
+            .makeText(
+                this,
+                "Автор: @akasoftpaw",
+                Toast.LENGTH_LONG
+            )
+            .show()
         lessons = readData()
 
         setContent {
@@ -410,6 +417,7 @@ class MainActivity : ComponentActivity() {
                     onClick = {
                         lessons = getSubjectsFromListString(text.split("\n"))
                         sub = lessons
+                        text = ""
 //                    writeText(text)
                         writeDataByMutableMap()
 
@@ -424,19 +432,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     @Composable
     fun MainScreen(
         onClickToScreen1: () -> Unit,
         onClickToScreen2: () -> Unit,
         onClickToScreen3: () -> Unit,
     ) {
+        val context = LocalContext.current
 
-        var datetime by remember {
+        var time by remember {
             mutableStateOf(
                 LocalTime.now()
             )
         }
-        LocalContext.current
+        var isExpanded by remember {
+            mutableStateOf(false)
+        }
+        var dayOfLessons by remember {
+            mutableStateOf(localDateTime.dayOfWeek)
+        }
 
         Column(
             modifier = Modifier.fillMaxSize()
@@ -445,73 +460,160 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = mainColor,
             ) {
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+//                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.softpaw),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .size(30.dp) //форма
-                    )
-                    Text("FIIT61", fontSize = 22.sp)
-                    Text(text = datetime.getTimeString(), fontSize = 22.sp)
-                    IconButton(onClick = {
-                        datetime = LocalTime.now()
-                    }) {
-                        Icon(Icons.Filled.Autorenew, contentDescription = "Info")
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Image(
+                                painter = painterResource(id = R.drawable.softpaw),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(30.dp) //форма
+                            )
+                            Text(text = "softpaw", fontSize = 12.sp)
+                        }
+
+                        Text("${localDateTime.dayOfMonth}.${localDateTime.month.value}", fontSize = 22.sp)
+                    }
+                    Text(text = "|", fontSize = 22.sp)
+
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = time.getTimeString(), fontSize = 22.sp)
+
+                        IconButton(onClick = {
+                            time = LocalTime.now()
+                            dayOfLessons = localDateTime.dayOfWeek
+                        }) {
+                            Icon(Icons.Filled.Autorenew, contentDescription = "updating")
+                        }
                     }
                 }
+
+
             }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
+                val thisfont = 20.sp
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val thisfont = 20.sp
-                    Text(
-                        text = if (weekOfYear == NumAndDen.Numerator) {
-                            "Числитель"
-                        } else {
-                            "Знаменатель"
-                        }, fontSize = thisfont
-                    )
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = if (weekOfYear == NumAndDen.Numerator) {
+                                "Числитель"
+                            } else {
+                                "Знаменатель"
+                            }, fontSize = thisfont
+                        )
+                    }
+
                     Text(text = "|", fontSize = thisfont)
-                    Text(text = d.dayOfWeek.name, fontSize = thisfont)
+
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Box()
+                        {
+                            Row(modifier = Modifier.clickable {
+                                isExpanded = true
+                            }) {
+                                Text(
+                                    text = dayOfLessons.name,
+                                    fontSize = thisfont,
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "click", fontSize = 10.sp)
+                            }
+                            DropdownMenu(
+                                expanded = isExpanded,
+                                onDismissRequest = {
+                                    isExpanded = false
+                                    time = LocalTime.now()
+                                }
+                            ) {
+                                for (i in 0..<7) {
+                                    Row() {
+                                        if (dayOfLessons == daysOfWeek[i]) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Done,
+                                                contentDescription = "thisDayOfWeek"
+                                            )
+                                        } else {
+                                            Spacer(modifier = Modifier.width(25.dp))
+                                        }
+                                        Text(
+                                            text = "${daysOfWeek[i].name}  ",
+                                            fontSize = thisfont,
+                                            modifier = Modifier.clickable {
+                                                time = LocalTime.now()
+                                                dayOfLessons = daysOfWeek[i]
+                                                isExpanded = false
+                                            })
+                                    }
+                                }
+                            }
+                        }
+                    }
+
 //                    Text(text = "|", fontSize = thisfont)
 //                    Text(text = "$numberOfSemester сем", fontSize = thisfont)
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
-                val listik: MutableList<Lesson> = lessons[d.dayOfWeek.value - 1]
-                if (listik.size == 0) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        for (i in 1..10) {
-                            Text(text = "Выходной?", fontSize = 17.sp)
-                            Spacer(modifier = Modifier.height(5.dp))
-                        }
-                    }
-                }
-                if (listik.isNotEmpty()) {
-                    for (indexOfSubject in 0..listik.lastIndex) {
-                        val thisLesson = listik[indexOfSubject]
-                        if (thisLesson.timeOfLesson.timeVnutri(datetime)) {
-                            thisLesson.GetStringForSchedule(colorOfThisPair)
-                        } else {
-                            thisLesson.GetStringForSchedule(colorOfAllPairs)
-                        }
 
+                Spacer(modifier = Modifier.height(10.dp))
+                Column(
+                    modifier = if (isExpanded) {
+                        Modifier
+                            .fillMaxSize()
+                            .clickable { isExpanded = false }
+                    } else {
+                        Modifier
+                            .fillMaxSize()
+                    }
+                ) {
+                    val lessonsOfThisDay: MutableList<Lesson> = lessons[dayOfLessons.value - 1]
+
+                    if (lessonsOfThisDay.isNotEmpty()) {
+                        for (indexOfSubject in 0..lessonsOfThisDay.lastIndex) {
+                            val thisLesson = lessonsOfThisDay[indexOfSubject]
+                            if (thisLesson.timeOfLesson.timeVnutri(time)) {
+                                thisLesson.GetStringForSchedule(colorOfThisPair)
+                            } else {
+                                thisLesson.GetStringForSchedule(colorOfAllPairs)
+                            }
+                        }
+                    } else {
+                        for (i in 1..10) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = "Weekends? Rest after death!", fontSize = 17.sp)
+                                Spacer(modifier = Modifier.height(5.dp))
+                            }
+                        }
                     }
                 }
             }
@@ -627,9 +729,9 @@ class MainActivity : ComponentActivity() {
     private fun getNumberOfSemester(): Int {
 //    var oneSemRange = listOf(8, 9, 10, 11, 12)
         val twoSemRange = listOf(2, 3, 4, 5, 6, 7, 8)
-        var cource = d.year - 2022
+        var cource = localDateTime.year - 2022
         val semester: Int
-        if (d.month.value !in twoSemRange) {
+        if (localDateTime.month.value !in twoSemRange) {
             cource += 1
             semester = 1
         } else {
@@ -658,7 +760,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            Toast.makeText(this, "local database has updated", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "local database has updated", Toast.LENGTH_SHORT).show()
             Log.e("MyLog", "end = WriteDataByMutableMap")
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR WRITING", Toast.LENGTH_LONG).show()
@@ -674,7 +776,7 @@ class MainActivity : ComponentActivity() {
             Log.e("MyLog", "readData = $listWithPairs")
             return getSubjectsFromListString(listWithPairs)
         } catch (e: Exception) {
-            Toast.makeText(this, "ERROR READING LOCAL DATABASE", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "ERROR READING LOCAL DATABASE", Toast.LENGTH_SHORT).show()
         }
         return getEmptyLessonsList()
     }

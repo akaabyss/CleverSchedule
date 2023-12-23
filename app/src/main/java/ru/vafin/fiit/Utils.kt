@@ -12,7 +12,6 @@ fun getDayOfWeekByStringWithName(str: String): DayOfWeek {
         DayOfWeek.FRIDAY.name -> DayOfWeek.FRIDAY
         DayOfWeek.SATURDAY.name -> DayOfWeek.SATURDAY
         else -> DayOfWeek.SUNDAY
-
     }
 }
 fun LocalTime.getTimeString(): String {

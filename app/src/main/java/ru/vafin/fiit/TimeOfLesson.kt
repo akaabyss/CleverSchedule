@@ -81,17 +81,37 @@ fun LocalTime.toShortString(): String {
 }
 
 fun String.stringToTimeOfPair(): TimeOfLesson {
-    val twoTimes = this.split("-")
+    val twoTimes = this.replace(" ", "").split("-")
     val forTimes = listOf(
         twoTimes[0].split(":"),
         twoTimes[1].split(":"),
     )
     return TimeOfLesson(
-        forTimes[0][0].toInt(),
-        forTimes[0][1].toInt(),
-        forTimes[1][0].toInt(),
-        forTimes[1][1].toInt()
+        forTimes[0][0].toMyInt(),
+        forTimes[0][1].toMyInt(),
+        forTimes[1][0].toMyInt(),
+        forTimes[1][1].toMyInt()
     )
+}
+
+fun String.toMyInt(): Int {
+    try {
+        return this.toInt()
+    } catch (e: Exception) {
+        return when (this) {
+            "01" -> 1
+            "02" -> 2
+            "03" -> 3
+            "04" -> 4
+            "05" -> 5
+            "06" -> 6
+            "07" -> 7
+            "08" -> 8
+            "09" -> 9
+            else -> 0
+        }
+    }
+
 }
 
 fun getTimeOfLessonByStringWithNumberOrStringWith4Times(str: String): TimeOfLesson {
@@ -110,6 +130,7 @@ fun getTimeOfLessonByStringWithNumberOrStringWith4Times(str: String): TimeOfLess
         str.stringToTimeOfPair()
     }
 }
+
 fun MutableList<MutableList<Lesson>>.sortedLessons() {
     for (day in daysOfWeek) {
         val lessonsInThisDay = this[day.value - 1]
