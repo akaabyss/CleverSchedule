@@ -3,18 +3,15 @@ package ru.vafin.fiit
 import java.time.LocalTime
 
 class TimeOfLesson(
-    startTime: Int = 0,
+    startHour: Int = 0,
     startMinute: Int = 0,
-    endTime: Int = 0,
+    endHour: Int = 0,
     endMinute: Int = 0,
 ) : Comparable<TimeOfLesson> {
-    var startTime: LocalTime = LocalTime.of(startTime, startMinute)
-    var endTime: LocalTime = LocalTime.of(endTime, endMinute)
+    var startTime: LocalTime = LocalTime.of(startHour, startMinute)
+    var endTime: LocalTime = LocalTime.of(endHour, endMinute)
     override fun compareTo(other: TimeOfLesson): Int {
         if (startTime.hour - other.startTime.hour == 0) {
-            if (startTime.minute - other.startTime.minute == 0) {
-                return 0
-            }
             return startTime.minute - other.startTime.minute
         }
         return startTime.hour - other.startTime.hour
@@ -131,13 +128,3 @@ fun getTimeOfLessonByStringWithNumberOrStringWith4Times(str: String): TimeOfLess
     }
 }
 
-fun MutableList<MutableList<Lesson>>.sortedLessons() {
-    for (day in daysOfWeek) {
-        val lessonsInThisDay = this[day.value - 1]
-        if (lessonsInThisDay.size != 0) {
-//                subjects?.set(day, lessonsInThisDay?.sorted())
-            lessonsInThisDay.sort()
-            this[day.value - 1] = lessonsInThisDay
-        }
-    }
-}

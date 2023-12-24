@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -72,9 +72,11 @@ import java.time.LocalTime
 import java.util.Calendar
 
 import androidx.compose.material.*
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 
-var localDateTime = LocalDateTime.now()
+var localDateTime: LocalDateTime = LocalDateTime.now()
 
 object FontSize {
     val bitText = 20.sp
@@ -89,14 +91,13 @@ val weekOfYear = if (calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
 
 
 class MainActivity : ComponentActivity() {
-    private var lessons = getEmptyLessonsList()
+    private var lessons = mutableListOf<Lesson>()
     private var fileBaseName = "dataForUniversityApp.txt"
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
     private val screen3 = "screen_3"
 
 
-    @SuppressLint("MutableCollectionMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Toast
@@ -107,6 +108,7 @@ class MainActivity : ComponentActivity() {
             )
             .show()
         lessons = readData()
+//        lessons[5].removeAt(1)
 
         setContent {
             val navController = rememberNavController()
@@ -145,9 +147,7 @@ class MainActivity : ComponentActivity() {
 
             }
 
-
         }
-
     }
 
     @SuppressLint("MutableCollectionMutableState")
@@ -157,8 +157,14 @@ class MainActivity : ComponentActivity() {
         onClickToScreen2: () -> Unit,
         onClickToScreen3: () -> Unit,
     ) {
-        val subjectsMut by remember {
-            mutableStateOf(lessons)
+//        var lessonsMutableState by remember {
+//            mutableStateOf(lessons)
+//        }
+        val lessonsMutableState = remember {
+            mutableStateListOf(*(lessons.toTypedArray()))
+        }
+        val editingSome = remember {
+            mutableStateOf(0)
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -174,29 +180,53 @@ class MainActivity : ComponentActivity() {
                     Text("Редактировать данные", fontSize = 22.sp)
                 }
             }
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(10f)
             ) {
-                for (day in daysOfWeek) {
-                    val thisDayLessons = subjectsMut[day.value - 1]
-                    itemsIndexed(thisDayLessons) { index, lesson ->
-                        if (index == 0) {
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .background(mainColor),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = day.name, fontSize = 18.sp)
-                            }
-                        }
-                        val les = remember {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    items(lessonsMutableState) { lesson ->
+                        var les: MutableState<Lesson>? = remember {
                             mutableStateOf(lesson)
                         }
                         PairEditCard(
-                            les
+                            les, editingSome,
+                        ) {
+                            Log.e(
+                                "MyLog1",
+                                "lessonsMutState before delete = ${lessonsMutableState.toList()}"
+                            )
+                            Log.e("MyLog1", "lessons before delete = $lessons")
+                            lessons.removeIf { it.toFileString() == lesson.toFileString() }
+                            lessonsMutableState.removeIf { it.toFileString() == lesson.toFileString() }
+//                        lessonsMutableState = lessons.toMutableList()
+//                        val x = lessonsMutableState.toTypedArray()
+//                        lessonsMutableState = mutableStateListOf(*x)
+                            Log.e("MyLog1", "removed = $lesson")
+                            Log.e(
+                                "MyLog1",
+                                "lessonsMutState after delete = ${lessonsMutableState.toList()}"
+                            )
+                            Log.e("MyLog1", "lessons after delete = $lessons")
+//                        les = null
+                            writeDataByMutableMap()
+                        }
+                    }
+                }
+                if (editingSome.value == 0) {
+                    IconButton(modifier = Modifier
+                        .align(Alignment.BottomCenter),
+                        onClick = {
+
+                        }) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircleOutline,
+                            contentDescription = "Add new pair",
+                            modifier = Modifier.size(50.dp)
                         )
                     }
                 }
@@ -211,172 +241,250 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun PairEditCard(pair: MutableState<Lesson>) {
-        val context = LocalContext.current
-        var isEditing by remember {
-            mutableStateOf(false)
-        }
-        var startTime by remember {
-            mutableStateOf(pair.value.timeOfLesson.startTime)
-        }
-        var endTime by remember {
-            mutableStateOf(pair.value.timeOfLesson.endTime)
-        }
-        var nameOfSubject by remember {
-            mutableStateOf(pair.value.nameOfSubject)
-        }
-        var nameOfTeacher by remember {
-            mutableStateOf(pair.value.nameOfTeacher)
-        }
-        var numberOfAud by remember {
-            mutableStateOf(pair.value.numberOfAud)
-        }
-        var numAndDen by remember {
-            mutableStateOf(pair.value.numeratorAndDenominator)
-        }
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = colorOfAllPairs,
-            ),
-        ) {
-            val thisFont1 = 17.sp
-            val thisFont2 = 15.sp
-            val thisFont3 = 17.sp
-            val thisFont4 = 15.sp
-            val thisFont5 = 15.sp
-            val thisExpandedFont1 = 19.sp
-            val thisExpandedFont2 = 17.sp
-            val thisExpandedFont3 = 17.sp
-            val thisExpandedFont4 = 19.sp
-            val thisExpandedFont5 = 17.sp
+    fun PairEditCard(
+        pair: MutableState<Lesson>?,
+        editingSome: MutableState<Int>,
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Column(
+        removingLesson: () -> Unit,
+    ) {
+        if (pair != null) {
+            val context = LocalContext.current
+
+            var isEditing by remember {
+                mutableStateOf(false)
+            }
+            var startTime by remember {
+                mutableStateOf(pair.value.timeOfLesson.startTime)
+            }
+            var endTime by remember {
+                mutableStateOf(pair.value.timeOfLesson.endTime)
+            }
+            var nameOfSubject by remember {
+                mutableStateOf(pair.value.nameOfSubject)
+            }
+            var nameOfTeacher by remember {
+                mutableStateOf(pair.value.nameOfTeacher)
+            }
+            var numberOfAud by remember {
+                mutableStateOf(pair.value.numberOfAud)
+            }
+            var numAndDen by remember {
+                mutableStateOf(pair.value.numeratorAndDenominator)
+            }
+            var dayOfThisPair by remember {
+                mutableStateOf(pair.value.dayOfThisPair)
+            }
+            var expandedDaysOfWeekList by remember {
+                mutableStateOf(false)
+            }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorOfAllPairs,
+                ),
+            ) {
+                val thisFont1 = 17.sp
+                val thisFont2 = 15.sp
+                val thisFont3 = 17.sp
+                val thisFont4 = 15.sp
+                val thisFont5 = 15.sp
+                val thisExpandedFont1 = 19.sp
+                val thisExpandedFont2 = 17.sp
+                val thisExpandedFont3 = 17.sp
+                val thisExpandedFont4 = 19.sp
+                val thisExpandedFont5 = 17.sp
+
+                Row(
                     modifier = Modifier
-                        .padding(start = 10.dp)
-                        .weight(1f)
+                        .fillMaxWidth()
                 ) {
-                    if (!isEditing) {
-                        Text(text = nameOfSubject, fontSize = thisFont1)
-                        Text(text = nameOfTeacher, fontSize = thisFont2)
-                        Text(text = numberOfAud, fontSize = thisFont3)
-                        Text(
-                            text = "${startTime.toShortString()} - ${endTime.toShortString()}",
-                            fontSize = thisFont4
-                        )
-                        Text(text = getStringWithNameByNumOrDen(numAndDen), fontSize = thisFont5)
-                    } else {
-                        TextField(
-                            value = nameOfSubject,
-                            onValueChange = {
-                                nameOfSubject = it
-                            },
-                            textStyle = TextStyle(fontSize = thisExpandedFont1),
-                            colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
-                        )
-                        TextField(
-                            value = nameOfTeacher,
-                            onValueChange = {
-                                nameOfTeacher = it
-                            },
-                            textStyle = TextStyle(fontSize = thisExpandedFont2),
-                            colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
-                        )
-                        TextField(
-                            value = numberOfAud,
-                            onValueChange = {
-                                numberOfAud = it
-                            },
-                            textStyle = TextStyle(fontSize = thisExpandedFont3),
-                            colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            Text(text = startTime.toShortString(),
-                                fontSize = thisExpandedFont4,
-                                modifier = Modifier.clickable {
-                                    TimePickerDialog(
-                                        context, { _, hour, minute ->
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .weight(1f)
+                    ) {
+                        if (!isEditing) {
+                            Text(text = nameOfSubject, fontSize = thisFont1)
+                            Text(text = nameOfTeacher, fontSize = thisFont2)
+                            Text(text = numberOfAud, fontSize = thisFont3)
+                            Text(
+                                text = "${startTime.toShortString()} - ${endTime.toShortString()}",
+                                fontSize = thisFont4
+                            )
+                            Text(
+                                text = "$dayOfThisPair : ${getStringWithNameByNumOrDen(numAndDen)}",
+                                fontSize = thisFont5
+                            )
+                        } else {
+                            TextField(
+                                value = nameOfSubject,
+                                onValueChange = {
+                                    nameOfSubject = it
+                                },
+                                textStyle = TextStyle(fontSize = thisExpandedFont1),
+                                colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
+                            )
+                            TextField(
+                                value = nameOfTeacher,
+                                onValueChange = {
+                                    nameOfTeacher = it
+                                },
+                                textStyle = TextStyle(fontSize = thisExpandedFont2),
+                                colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
+                            )
+                            TextField(
+                                value = numberOfAud,
+                                onValueChange = {
+                                    numberOfAud = it
+                                },
+                                textStyle = TextStyle(fontSize = thisExpandedFont3),
+                                colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceAround,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(5.dp)
+                            ) {
+                                Row {
+                                    Text(text = startTime.toShortString(),
+                                        fontSize = thisExpandedFont4,
+                                        modifier = Modifier.clickable {
+                                            TimePickerDialog(
+                                                context, { _, hour, minute ->
 //                                            timeOfLesson.startTime.hour.plus(hour - timeOfLesson.startTime.hour)
 //                                            timeOfLesson.startTime.minute.plus(minute - timeOfLesson.startTime.minute)
-                                            startTime = LocalTime.of(hour, minute)
-                                        }, startTime.hour, startTime.minute, true
-                                    ).show()
-                                })
-                            Text(text = " - ", fontSize = thisExpandedFont4)
-                            Text(text = endTime.toShortString(),
-                                fontSize = thisExpandedFont4,
-                                modifier = Modifier.clickable {
-                                    TimePickerDialog(
-                                        context, { _, hour, minute ->
+                                                    startTime = LocalTime.of(hour, minute)
+                                                }, startTime.hour, startTime.minute, true
+                                            ).show()
+                                        })
+                                    TextHint(text = "click")
+                                }
+                                Text(text = " - ", fontSize = thisExpandedFont4)
+                                Row {
+                                    Text(text = endTime.toShortString(),
+                                        fontSize = thisExpandedFont4,
+                                        modifier = Modifier.clickable {
+                                            TimePickerDialog(
+                                                context, { _, hour, minute ->
 //                                            timeOfLesson.endTime.hour.plus(hour - timeOfLesson.endTime.hour)
 //                                            timeOfLesson.endTime.minute.plus(hour - timeOfLesson.endTime.minute)
-                                            endTime = LocalTime.of(hour, minute)
-                                        }, endTime.hour, endTime.minute, true
-                                    ).show()
-                                })
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Button(
-                                onClick = { numAndDen = NumAndDen.Numerator },
-                                enabled = (numAndDen != NumAndDen.Numerator),
-                                modifier = Modifier,
-                            ) {
-                                Text(text = "Числитель", fontSize = thisExpandedFont5)
+                                                    endTime = LocalTime.of(hour, minute)
+                                                }, endTime.hour, endTime.minute, true
+                                            ).show()
+                                        })
+                                    TextHint(text = "click")
+                                }
                             }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Button(
-                                onClick = { numAndDen = NumAndDen.Every },
-                                enabled = (numAndDen != NumAndDen.Every),
-                                modifier = Modifier,
-                            ) {
-                                Text(text = "Всегда", fontSize = thisExpandedFont5)
+
+                            Box {
+                                Row {
+                                    Text(
+                                        text = dayOfThisPair.name, modifier = Modifier.clickable {
+                                            expandedDaysOfWeekList = true
+                                        },
+                                        fontSize = thisExpandedFont4
+                                    )
+                                    TextHint("click")
+                                }
+                                DropdownMenu(
+                                    expanded = expandedDaysOfWeekList,
+                                    onDismissRequest = {
+                                        expandedDaysOfWeekList = false
+                                    },
+                                    modifier = Modifier.padding(4.dp)
+                                ) {
+                                    for (day in daysOfWeek) {
+                                        Row {
+                                            if (day == dayOfThisPair) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Done,
+                                                    contentDescription = "thisDayOfWeek"
+                                                )
+                                            } else {
+                                                Spacer(modifier = Modifier.width(25.dp))
+                                            }
+                                            Text(
+                                                text = day.name, modifier = Modifier.clickable {
+                                                    dayOfThisPair = day
+                                                    expandedDaysOfWeekList = false
+                                                },
+                                                fontSize = thisExpandedFont4
+                                            )
+                                            Spacer(modifier = Modifier.width(25.dp))
+                                        }
+                                    }
+                                }
                             }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Button(
-                                onClick = { numAndDen = NumAndDen.Denominator },
-                                enabled = (numAndDen != NumAndDen.Denominator),
-                                modifier = Modifier,
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start
                             ) {
-                                Text(text = "Знаменатель", fontSize = thisExpandedFont5)
+                                Button(
+                                    onClick = { numAndDen = NumAndDen.Numerator },
+                                    enabled = (numAndDen != NumAndDen.Numerator),
+                                    modifier = Modifier,
+                                ) {
+                                    Text(text = "Числитель", fontSize = thisExpandedFont5)
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Button(
+                                    onClick = { numAndDen = NumAndDen.Every },
+                                    enabled = (numAndDen != NumAndDen.Every),
+                                    modifier = Modifier,
+                                ) {
+                                    Text(text = "Всегда", fontSize = thisExpandedFont5)
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Button(
+                                    onClick = { numAndDen = NumAndDen.Denominator },
+                                    enabled = (numAndDen != NumAndDen.Denominator),
+                                    modifier = Modifier,
+                                ) {
+                                    Text(text = "Знаменатель", fontSize = thisExpandedFont5)
+                                }
                             }
                         }
                     }
-                }
-                IconButton(onClick = {
-                    if (isEditing) {
-                        pair.value.nameOfSubject = nameOfSubject
-                        pair.value.nameOfTeacher = nameOfTeacher
-                        pair.value.numberOfAud = numberOfAud
-                        pair.value.timeOfLesson.startTime = startTime
-                        pair.value.timeOfLesson.endTime = endTime
-                        pair.value.numeratorAndDenominator = numAndDen
-                        lessons.sortedLessons()
-                        writeDataByMutableMap()
-                    }
-                    isEditing = !isEditing
-                }) {
-                    if (!isEditing) {
-                        Icon(Icons.Default.Edit, contentDescription = "IconEdit")
-                    } else {
-                        Icon(Icons.Default.Done, contentDescription = "IconDone")
+                    Column {
+                        IconButton(onClick = {
+                            if (isEditing) {
+                                pair.value.nameOfSubject = nameOfSubject
+                                pair.value.nameOfTeacher = nameOfTeacher
+                                pair.value.numberOfAud = numberOfAud
+                                pair.value.timeOfLesson.startTime = startTime
+                                pair.value.timeOfLesson.endTime = endTime
+                                pair.value.numeratorAndDenominator = numAndDen
+                                lessons.sort()
+                                writeDataByMutableMap()
+                                editingSome.value -= 1
+                            } else {
+                                editingSome.value += 1
+                            }
+                            isEditing = !isEditing
+                        }) {
+                            if (!isEditing) {
+                                Icon(Icons.Default.Edit, contentDescription = "IconEdit")
+                            } else {
+                                Icon(Icons.Default.Done, contentDescription = "IconDone")
+                            }
+                        }
+                        IconButton(onClick = {
+//                        if (lessons[pair.value.dayOfThisPair.value - 1].removeLesson(pair.value))
+//                            Toast.makeText(context, pair.toString(), Toast.LENGTH_LONG).show()
+                            removingLesson()
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete lesson")
+                        }
                     }
                 }
             }
@@ -481,7 +589,10 @@ class MainActivity : ComponentActivity() {
                             Text(text = "softpaw", fontSize = 12.sp)
                         }
 
-                        Text("${localDateTime.dayOfMonth}.${localDateTime.month.value}", fontSize = 22.sp)
+                        Text(
+                            "${localDateTime.dayOfMonth}.${localDateTime.month.value}",
+                            fontSize = 22.sp
+                        )
                     }
                     Text(text = "|", fontSize = 22.sp)
 
@@ -536,25 +647,27 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Box()
                         {
-                            Row(modifier = Modifier.clickable {
-                                isExpanded = true
-                            }) {
+                            Row(modifier = Modifier
+                                .clickable {
+                                    isExpanded = true
+                                }
+                                .padding(vertical = 4.dp)) {
                                 Text(
                                     text = dayOfLessons.name,
                                     fontSize = thisfont,
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "click", fontSize = 10.sp)
+                                TextHint("click")
                             }
                             DropdownMenu(
                                 expanded = isExpanded,
                                 onDismissRequest = {
                                     isExpanded = false
                                     time = LocalTime.now()
-                                }
+                                },
+                                modifier = Modifier.padding(4.dp)
                             ) {
                                 for (i in 0..<7) {
-                                    Row() {
+                                    Row {
                                         if (dayOfLessons == daysOfWeek[i]) {
                                             Icon(
                                                 imageVector = Icons.Filled.Done,
@@ -563,14 +676,19 @@ class MainActivity : ComponentActivity() {
                                         } else {
                                             Spacer(modifier = Modifier.width(25.dp))
                                         }
-                                        Text(
-                                            text = "${daysOfWeek[i].name}  ",
-                                            fontSize = thisfont,
-                                            modifier = Modifier.clickable {
-                                                time = LocalTime.now()
-                                                dayOfLessons = daysOfWeek[i]
-                                                isExpanded = false
-                                            })
+                                        Row {
+                                            Text(
+                                                text = daysOfWeek[i].name,
+                                                fontSize = thisfont,
+                                                modifier = Modifier.clickable {
+                                                    time = LocalTime.now()
+                                                    dayOfLessons = daysOfWeek[i]
+                                                    isExpanded = false
+                                                })
+                                            if (daysOfWeek[i] == localDateTime.dayOfWeek) {
+                                               TextHint(text = "today")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -583,6 +701,7 @@ class MainActivity : ComponentActivity() {
 
 
                 Spacer(modifier = Modifier.height(10.dp))
+
                 Column(
                     modifier = if (isExpanded) {
                         Modifier
@@ -593,7 +712,7 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                     }
                 ) {
-                    val lessonsOfThisDay: MutableList<Lesson> = lessons[dayOfLessons.value - 1]
+                    val lessonsOfThisDay = lessons.filter { it.dayOfThisPair == dayOfLessons }
 
                     if (lessonsOfThisDay.isNotEmpty()) {
                         for (indexOfSubject in 0..lessonsOfThisDay.lastIndex) {
@@ -624,6 +743,7 @@ class MainActivity : ComponentActivity() {
 
     }
 
+
     @Composable
     fun BottomBar(
         onClickToScreen1: () -> Unit,
@@ -632,8 +752,7 @@ class MainActivity : ComponentActivity() {
         selected1: Boolean = false,
         selected2: Boolean = false,
         selected3: Boolean = false,
-
-        ) {
+    ) {
         BottomNavigation(
             modifier = Modifier.fillMaxWidth(),
             backgroundColor = mainColor,
@@ -752,12 +871,9 @@ class MainActivity : ComponentActivity() {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             file.writeText("")
             Log.e("MyLog", "start = WriteDataByMutableMap")
-            for (day in daysOfWeek) {
-                val subjectsInThisDay = lessons[day.value - 1]
-                if (subjectsInThisDay.isNotEmpty()) {
-                    for (subject in subjectsInThisDay) {
-                        file.appendText(subject.toFileString() + "\n")
-                    }
+            if (lessons.isNotEmpty()) {
+                for (lesson in lessons) {
+                    file.appendText(lesson.toFileString() + "\n")
                 }
             }
             Toast.makeText(this, "local database has updated", Toast.LENGTH_SHORT).show()
@@ -769,7 +885,7 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun readData(): MutableList<MutableList<Lesson>> {
+    private fun readData(): MutableList<Lesson> {
         try {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             val listWithPairs = file.readLines()
@@ -778,7 +894,7 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, "ERROR READING LOCAL DATABASE", Toast.LENGTH_SHORT).show()
         }
-        return getEmptyLessonsList()
+        return mutableListOf()
     }
 
 }
