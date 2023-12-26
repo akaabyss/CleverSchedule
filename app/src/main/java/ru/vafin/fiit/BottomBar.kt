@@ -6,7 +6,7 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -37,7 +37,7 @@ fun BottomBar(
         )
 
         BottomNavigationItem(
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Icon2") },
+            icon = { Icon(Icons.Default.UploadFile, contentDescription = "Icon2") },
             selected = selected2,
             onClick = {
                 onClickToScreen2()

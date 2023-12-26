@@ -2,7 +2,10 @@ package ru.vafin.fiit
 
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -43,6 +46,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -128,7 +132,9 @@ class MainActivity : ComponentActivity() {
         var adding by remember {
             mutableStateOf(false)
         }
-
+        var permissionForRemoving by remember {
+            mutableStateOf(false)
+        }
         val context = LocalContext.current
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -141,6 +147,25 @@ class MainActivity : ComponentActivity() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Редактировать данные", fontSize = 22.sp)
+                    IconButton(onClick = {
+                        permissionForRemoving = !permissionForRemoving
+                    }) {
+                        if (permissionForRemoving) {
+                            Icon(imageVector = Icons.Filled.Done,
+                                contentDescription = "remove permission for remove",
+                                modifier = Modifier.clickable {
+                                    permissionForRemoving = false
+                                })
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "take permission for remove",
+                                modifier = Modifier.clickable {
+                                    permissionForRemoving = true
+                                }
+                            )
+                        }
+                    }
                 }
             }
             Box(
@@ -173,7 +198,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 ) {
-                                    if (!isEditing) {
+                                    if (!isEditing && permissionForRemoving) {
                                         IconButton(onClick = {
                                             lessonsMutableState.remove(lesson)
                                             Log.e("MyLog", "delete = $lesson")
@@ -182,7 +207,7 @@ class MainActivity : ComponentActivity() {
                                             lessonsMutableState.writeDataToFile(context)
                                         }) {
                                             Icon(
-                                                Icons.Default.Delete,
+                                                Icons.Filled.Delete,
                                                 contentDescription = "Delete lesson"
                                             )
                                         }
@@ -733,7 +758,7 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    @SuppressLint("MutableCollectionMutableState")
+    @SuppressLint("MutableCollectionMutableState", "ServiceCast")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ScreenWithPickData(
@@ -744,41 +769,85 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         var text by remember { mutableStateOf("") }
         var lessons: SnapshotStateList<Lesson>
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                backgroundColor = mainColor,
             ) {
-                TextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .fillMaxWidth()
-                        .weight(10f),
-                    label = { Text(text = "splittable text") }
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Выгрузить список пар",
+                        fontSize = 22.sp
+                    )
+                }
+            }
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth()
+                    .weight(10f),
+                label = { Text(text = "splittable text") }
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        var textForCopy = ""
+                        for (lesson in readData(context)) {
+                            textForCopy += lesson.toFileString() + "\n"
+                        }
+                        val clipboardManager =
+                            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipData = ClipData.newPlainText("text", textForCopy)
+                        clipboardManager.setPrimaryClip(clipData)
+                    }
+                ) {
+                    Text(text = "copy lessons")
+                }
                 Button(
                     onClick = {
                         lessons =
-                            mutableStateListOf(*(getSubjectsFromListString(text.split("\n")).toTypedArray()))
+                            mutableStateListOf(*(getLessonsFromListString(text.split("\n")).toTypedArray()))
                         text = ""
                         lessons.sort()
                         lessons.writeDataToFile(context)
 
                     }, enabled = text.isNotEmpty()
                 ) {
-                    Text(text = "update subjects")
+                    Text(text = "update lessons")
                 }
-                BottomBar(
-                    onClickToScreen1, onClickToScreen2, onClickToScreen3, selected2 = true
-                )
             }
+
+
+//                    var text = "И сделать кнопку \"скопировать\""
+//                Text(text = text)
+//                        Button(onClick = {
+//                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+//                    val clip: ClipData = ClipData.newPlainText("", text)
+//                    clipboard.setPrimaryClip(clip)
+//
+//                }) {
+//                    Text(text = "copy")
+//                }
+            BottomBar(
+                onClickToScreen1, onClickToScreen2, onClickToScreen3, selected2 = true
+            )
         }
+
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -967,8 +1036,8 @@ class MainActivity : ComponentActivity() {
                     val lessonsOfThisDay = lessons.filter { it.dayOfThisPair == dayOfLessons }
 
                     if (lessonsOfThisDay.isNotEmpty()) {
-                        for (indexOfSubject in 0..lessonsOfThisDay.lastIndex) {
-                            val thisLesson = lessonsOfThisDay[indexOfSubject]
+                        for (indexOfLesson in 0..lessonsOfThisDay.lastIndex) {
+                            val thisLesson = lessonsOfThisDay[indexOfLesson]
                             if (thisLesson.timeOfLesson.timeVnutri(time)) {
                                 thisLesson.GetStringForSchedule(colorOfThisPair)
                             } else {
@@ -1024,6 +1093,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
             BottomBar(
                 onClickToScreen1, onClickToScreen2, onClickToScreen3, selected1 = true
             )
@@ -1032,4 +1102,3 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-

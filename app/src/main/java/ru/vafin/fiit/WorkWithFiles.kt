@@ -6,7 +6,7 @@ import android.widget.Toast
 import java.io.File
 
 private var fileBaseName = "dataForUniversityApp.txt"
-fun getSubjectsFromListString(
+fun getLessonsFromListString(
     selectedTextByStrings: List<String>,
 ): MutableList<Lesson> {
     val result = mutableListOf<Lesson>()
@@ -29,7 +29,7 @@ fun readData(context: Context): MutableList<Lesson> {
         val file = File(context.getExternalFilesDir(null), fileBaseName)
         val listWithPairs = file.readLines()
         Log.e("MyLog", "readData = $listWithPairs")
-        return getSubjectsFromListString(listWithPairs)
+        return getLessonsFromListString(listWithPairs)
     } catch (e: Exception) {
 //        Toast.makeText(context, "ERROR READING LOCAL DATABASE", Toast.LENGTH_SHORT).show()
     }
@@ -51,5 +51,4 @@ fun MutableList<Lesson>.writeDataToFile(context: Context) {
         Toast.makeText(context, "ERROR WRITING", Toast.LENGTH_LONG).show()
 //            Log.e("Artur", e.message ?: "")
     }
-
 }

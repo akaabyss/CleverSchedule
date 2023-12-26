@@ -18,7 +18,7 @@ fun getDayOfWeekByStringWithName(str: String): DayOfWeek {
 }
 
 var localDateTime: LocalDateTime = LocalDateTime.now()
-val calendar = Calendar.getInstance()
+val calendar: Calendar = Calendar.getInstance()
 val weekOfYear = if (calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
     NumAndDen.Denominator
 } else {
