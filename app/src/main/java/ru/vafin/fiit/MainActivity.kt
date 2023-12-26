@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -88,10 +88,19 @@ val weekOfYear = if (calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
 } else {
     NumAndDen.Numerator
 }
+val thisFont1 = 17.sp
+val thisFont2 = 15.sp
+val thisFont3 = 17.sp
+val thisFont4 = 15.sp
+val thisFont5 = 15.sp
+val thisExpandedFont1 = 19.sp
+val thisExpandedFont2 = 17.sp
+val thisExpandedFont3 = 17.sp
+val thisExpandedFont4 = 19.sp
+val thisExpandedFont5 = 17.sp
 
 
 class MainActivity : ComponentActivity() {
-    private var lessons = mutableListOf<Lesson>()
     private var fileBaseName = "dataForUniversityApp.txt"
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
@@ -107,8 +116,6 @@ class MainActivity : ComponentActivity() {
                 Toast.LENGTH_LONG
             )
             .show()
-        lessons = readData()
-//        lessons[5].removeAt(1)
 
         setContent {
             val navController = rememberNavController()
@@ -150,6 +157,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("MutableCollectionMutableState")
     @Composable
     fun EditScreen(
@@ -161,11 +169,13 @@ class MainActivity : ComponentActivity() {
 //            mutableStateOf(lessons)
 //        }
         val lessonsMutableState = remember {
-            mutableStateListOf(*(lessons.toTypedArray()))
+            mutableStateListOf(*(readData().toTypedArray()))
         }
         val editingSome = remember {
             mutableStateOf(0)
         }
+
+        val context = LocalContext.current
 
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
@@ -189,32 +199,310 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    items(lessonsMutableState) { lesson ->
-                        var les: MutableState<Lesson>? = remember {
-                            mutableStateOf(lesson)
+                    itemsIndexed(lessonsMutableState) { index, lesson ->
+                        var isEditing by remember {
+                            mutableStateOf(false)
                         }
-                        PairEditCard(
-                            les, editingSome,
+                        var expandedDaysOfWeekList by remember {
+                            mutableStateOf(false)
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = colorOfAllPairs,
+                            ),
                         ) {
-                            Log.e(
-                                "MyLog1",
-                                "lessonsMutState before delete = ${lessonsMutableState.toList()}"
-                            )
-                            Log.e("MyLog1", "lessons before delete = $lessons")
-                            lessons.removeIf { it.toFileString() == lesson.toFileString() }
-                            lessonsMutableState.removeIf { it.toFileString() == lesson.toFileString() }
-//                        lessonsMutableState = lessons.toMutableList()
-//                        val x = lessonsMutableState.toTypedArray()
-//                        lessonsMutableState = mutableStateListOf(*x)
-                            Log.e("MyLog1", "removed = $lesson")
-                            Log.e(
-                                "MyLog1",
-                                "lessonsMutState after delete = ${lessonsMutableState.toList()}"
-                            )
-                            Log.e("MyLog1", "lessons after delete = $lessons")
-//                        les = null
-                            writeDataByMutableMap()
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(start = 10.dp)
+                                        .weight(1f)
+                                ) {
+                                    if (!isEditing) {
+                                        Text(
+                                            text = lesson.nameOfSubject,
+                                            fontSize = thisFont1
+                                        )
+                                        Text(
+                                            text = lesson.nameOfTeacher,
+                                            fontSize = thisFont2
+                                        )
+                                        Text(
+                                            text = lesson.numberOfAud,
+                                            fontSize = thisFont3
+                                        )
+                                        Text(
+                                            text = "${lesson.timeOfLesson.startTime.toShortString()} - ${lesson.timeOfLesson.endTime.toShortString()}",
+                                            fontSize = thisFont4
+                                        )
+                                        Text(
+                                            text = "${lesson.dayOfThisPair} : ${
+                                                getStringWithNameByNumOrDen(
+                                                    lesson.numeratorAndDenominator
+                                                )
+                                            }",
+                                            fontSize = thisFont5
+                                        )
+                                    } else {
+                                        TextField(
+                                            value = lessonsMutableState[index].nameOfSubject,
+                                            onValueChange = {
+                                                lessonsMutableState[index] =
+                                                    lessonsMutableState[index].copy(nameOfSubject = it)
+                                            },
+                                            textStyle = TextStyle(fontSize = thisExpandedFont1),
+                                            colors = TextFieldDefaults.textFieldColors(
+                                                containerColor = colorOfAllPairs
+                                            ),
+                                        )
+                                        TextField(
+                                            value = lessonsMutableState[index].nameOfTeacher,
+                                            onValueChange = {
+                                                lessonsMutableState[index] =
+                                                    lessonsMutableState[index].copy(nameOfTeacher = it)
+
+                                            },
+                                            textStyle = TextStyle(fontSize = thisExpandedFont2),
+                                            colors = TextFieldDefaults.textFieldColors(
+                                                containerColor = colorOfAllPairs
+                                            ),
+                                        )
+                                        TextField(
+                                            value = lessonsMutableState[index].numberOfAud,
+                                            onValueChange = {
+                                                lessonsMutableState[index] =
+                                                    lessonsMutableState[index].copy(numberOfAud = it)
+
+                                            },
+                                            textStyle = TextStyle(fontSize = thisExpandedFont3),
+                                            colors = TextFieldDefaults.textFieldColors(
+                                                containerColor = colorOfAllPairs
+                                            ),
+                                        )
+                                        Row(
+                                            horizontalArrangement = Arrangement.SpaceAround,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(5.dp)
+                                        ) {
+                                            Row {
+                                                Text(text = lessonsMutableState[index].timeOfLesson.startTime.toShortString(),
+                                                    fontSize = thisExpandedFont4,
+                                                    modifier = Modifier.clickable {
+                                                        TimePickerDialog(
+                                                            context,
+                                                            { _, hour, minute ->
+                                                                lessonsMutableState[index] =
+                                                                    lessonsMutableState[index].copy(
+                                                                        timeOfLesson = TimeOfLesson(
+                                                                            hour, minute,
+                                                                            lessonsMutableState[index].timeOfLesson.endTime.hour,
+                                                                            lessonsMutableState[index].timeOfLesson.endTime.minute,
+                                                                        )
+                                                                    )
+                                                            },
+                                                            lessonsMutableState[index].timeOfLesson.startTime.hour,
+                                                            lessonsMutableState[index].timeOfLesson.startTime.minute,
+                                                            true
+                                                        ).show()
+                                                    })
+                                                TextHint(text = "click")
+                                            }
+                                            Text(text = " - ", fontSize = thisExpandedFont4)
+                                            Row {
+                                                Text(text = lessonsMutableState[index].timeOfLesson.endTime.toShortString(),
+                                                    fontSize = thisExpandedFont4,
+                                                    modifier = Modifier.clickable {
+                                                        TimePickerDialog(
+                                                            context,
+                                                            { _, hour, minute ->
+
+                                                                lessonsMutableState[index] =
+                                                                    lessonsMutableState[index].copy(
+                                                                        timeOfLesson = TimeOfLesson(
+                                                                            lessonsMutableState[index].timeOfLesson.startTime.hour,
+                                                                            lessonsMutableState[index].timeOfLesson.startTime.minute,
+                                                                            hour, minute,
+                                                                        )
+                                                                    )
+                                                            },
+                                                            lessonsMutableState[index].timeOfLesson.endTime.hour,
+                                                            lessonsMutableState[index].timeOfLesson.endTime.minute,
+                                                            true
+                                                        ).show()
+                                                    })
+                                                TextHint(text = "click")
+                                            }
+                                        }
+
+                                        Box {
+                                            Row {
+                                                Text(
+                                                    text = lessonsMutableState[index].dayOfThisPair.name,
+                                                    modifier = Modifier.clickable {
+                                                        expandedDaysOfWeekList = true
+                                                    },
+                                                    fontSize = thisExpandedFont4
+                                                )
+                                                TextHint("click")
+                                            }
+                                            DropdownMenu(
+                                                expanded = expandedDaysOfWeekList,
+                                                onDismissRequest = {
+                                                    expandedDaysOfWeekList = false
+                                                },
+                                                modifier = Modifier.padding(4.dp)
+                                            ) {
+                                                for (day in daysOfWeek) {
+                                                    Row {
+                                                        if (day == lessonsMutableState[index].dayOfThisPair) {
+                                                            Icon(
+                                                                imageVector = Icons.Filled.Done,
+                                                                contentDescription = "thisDayOfWeek"
+                                                            )
+                                                        } else {
+                                                            Spacer(modifier = Modifier.width(25.dp))
+                                                        }
+                                                        Text(
+                                                            text = day.name,
+                                                            modifier = Modifier.clickable {
+                                                                lessonsMutableState[index].dayOfThisPair =
+                                                                    day
+                                                                expandedDaysOfWeekList = false
+                                                            },
+                                                            fontSize = thisExpandedFont4
+                                                        )
+                                                        Spacer(modifier = Modifier.width(25.dp))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.Start
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    lessonsMutableState[index] =
+                                                        lessonsMutableState[index].copy(
+                                                            numeratorAndDenominator =
+                                                            NumAndDen.Numerator
+                                                        )
+                                                },
+                                                enabled = (lessonsMutableState[index].numeratorAndDenominator != NumAndDen.Numerator),
+                                                modifier = Modifier,
+                                            ) {
+                                                Text(
+                                                    text = "Числитель",
+                                                    fontSize = thisExpandedFont5
+                                                )
+                                            }
+                                        }
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    lessonsMutableState[index] =
+                                                        lessonsMutableState[index].copy(
+                                                            numeratorAndDenominator =
+                                                            NumAndDen.Every
+                                                        )
+                                                },
+                                                enabled = (lessonsMutableState[index].numeratorAndDenominator != NumAndDen.Every),
+                                                modifier = Modifier,
+                                            ) {
+                                                Text(text = "Всегда", fontSize = thisExpandedFont5)
+                                            }
+                                        }
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    lessonsMutableState[index] =
+                                                        lessonsMutableState[index].copy(
+                                                            numeratorAndDenominator =
+                                                            NumAndDen.Denominator
+                                                        )
+                                                },
+                                                enabled = (lessonsMutableState[index].numeratorAndDenominator != NumAndDen.Denominator),
+                                                modifier = Modifier,
+                                            ) {
+                                                Text(
+                                                    text = "Знаменатель",
+                                                    fontSize = thisExpandedFont5
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                Column {
+                                    IconButton(onClick = {
+                                        if (isEditing) {
+                                            writeDataToFile(lessonsMutableState)
+                                            editingSome.value -= 1
+                                        } else {
+                                            editingSome.value += 1
+                                        }
+                                        isEditing = !isEditing
+                                    }) {
+                                        if (!isEditing) {
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = "IconEdit"
+                                            )
+                                        } else {
+                                            Icon(
+                                                Icons.Default.Done,
+                                                contentDescription = "IconDone"
+                                            )
+                                        }
+                                    }
+                                    IconButton(onClick = {
+//                        if (lessons[lessonsMutableState[index].dayOfThisPair.value - 1].removeLesson(pair.value))
+//                            Toast.makeText(context, pair.toString(), Toast.LENGTH_LONG).show()
+                                        lessonsMutableState.remove(lesson)
+                                        Log.e("MyLog", "delete = $lesson")
+                                        Toast.makeText(context, "deleted?", Toast.LENGTH_SHORT)
+                                            .show()
+                                        writeDataToFile(lessonsMutableState)
+                                    }) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete lesson"
+                                        )
+                                    }
+                                }
+                            }
                         }
+//                        PairEditCard(
+//                            lesson, editingSome,
+//                        ) {
+//                            Log.e(
+//                                "MyLog",
+//                                "lessonsMutState before delete = ${lessonsMutableState.toList()}"
+//                            )
+//                            Log.e("MyLog", "lessons before delete = $lessons")
+//                            lessons.remove(lesson)
+//                            lessonsMutableState.remove(lesson)
+//                            Log.e("MyLog", "removed = $lesson")
+//                            Log.e(
+//                                "MyLog",
+//                                "lessonsMutState after delete = ${lessonsMutableState.toList()}"
+//                            )
+//                            Log.e("MyLog", "lessons after delete = $lessons")
+////                        les = null
+//                            writeDataByMutableMap()
+//                        }
                     }
                 }
                 if (editingSome.value == 0) {
@@ -242,253 +530,15 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun PairEditCard(
-        pair: MutableState<Lesson>?,
+        pair: Lesson,
         editingSome: MutableState<Int>,
 
         removingLesson: () -> Unit,
     ) {
-        if (pair != null) {
-            val context = LocalContext.current
 
-            var isEditing by remember {
-                mutableStateOf(false)
-            }
-            var startTime by remember {
-                mutableStateOf(pair.value.timeOfLesson.startTime)
-            }
-            var endTime by remember {
-                mutableStateOf(pair.value.timeOfLesson.endTime)
-            }
-            var nameOfSubject by remember {
-                mutableStateOf(pair.value.nameOfSubject)
-            }
-            var nameOfTeacher by remember {
-                mutableStateOf(pair.value.nameOfTeacher)
-            }
-            var numberOfAud by remember {
-                mutableStateOf(pair.value.numberOfAud)
-            }
-            var numAndDen by remember {
-                mutableStateOf(pair.value.numeratorAndDenominator)
-            }
-            var dayOfThisPair by remember {
-                mutableStateOf(pair.value.dayOfThisPair)
-            }
-            var expandedDaysOfWeekList by remember {
-                mutableStateOf(false)
-            }
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorOfAllPairs,
-                ),
-            ) {
-                val thisFont1 = 17.sp
-                val thisFont2 = 15.sp
-                val thisFont3 = 17.sp
-                val thisFont4 = 15.sp
-                val thisFont5 = 15.sp
-                val thisExpandedFont1 = 19.sp
-                val thisExpandedFont2 = 17.sp
-                val thisExpandedFont3 = 17.sp
-                val thisExpandedFont4 = 19.sp
-                val thisExpandedFont5 = 17.sp
+        val context = LocalContext.current
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .weight(1f)
-                    ) {
-                        if (!isEditing) {
-                            Text(text = nameOfSubject, fontSize = thisFont1)
-                            Text(text = nameOfTeacher, fontSize = thisFont2)
-                            Text(text = numberOfAud, fontSize = thisFont3)
-                            Text(
-                                text = "${startTime.toShortString()} - ${endTime.toShortString()}",
-                                fontSize = thisFont4
-                            )
-                            Text(
-                                text = "$dayOfThisPair : ${getStringWithNameByNumOrDen(numAndDen)}",
-                                fontSize = thisFont5
-                            )
-                        } else {
-                            TextField(
-                                value = nameOfSubject,
-                                onValueChange = {
-                                    nameOfSubject = it
-                                },
-                                textStyle = TextStyle(fontSize = thisExpandedFont1),
-                                colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
-                            )
-                            TextField(
-                                value = nameOfTeacher,
-                                onValueChange = {
-                                    nameOfTeacher = it
-                                },
-                                textStyle = TextStyle(fontSize = thisExpandedFont2),
-                                colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
-                            )
-                            TextField(
-                                value = numberOfAud,
-                                onValueChange = {
-                                    numberOfAud = it
-                                },
-                                textStyle = TextStyle(fontSize = thisExpandedFont3),
-                                colors = TextFieldDefaults.textFieldColors(containerColor = colorOfAllPairs),
-                            )
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceAround,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(5.dp)
-                            ) {
-                                Row {
-                                    Text(text = startTime.toShortString(),
-                                        fontSize = thisExpandedFont4,
-                                        modifier = Modifier.clickable {
-                                            TimePickerDialog(
-                                                context, { _, hour, minute ->
-//                                            timeOfLesson.startTime.hour.plus(hour - timeOfLesson.startTime.hour)
-//                                            timeOfLesson.startTime.minute.plus(minute - timeOfLesson.startTime.minute)
-                                                    startTime = LocalTime.of(hour, minute)
-                                                }, startTime.hour, startTime.minute, true
-                                            ).show()
-                                        })
-                                    TextHint(text = "click")
-                                }
-                                Text(text = " - ", fontSize = thisExpandedFont4)
-                                Row {
-                                    Text(text = endTime.toShortString(),
-                                        fontSize = thisExpandedFont4,
-                                        modifier = Modifier.clickable {
-                                            TimePickerDialog(
-                                                context, { _, hour, minute ->
-//                                            timeOfLesson.endTime.hour.plus(hour - timeOfLesson.endTime.hour)
-//                                            timeOfLesson.endTime.minute.plus(hour - timeOfLesson.endTime.minute)
-                                                    endTime = LocalTime.of(hour, minute)
-                                                }, endTime.hour, endTime.minute, true
-                                            ).show()
-                                        })
-                                    TextHint(text = "click")
-                                }
-                            }
 
-                            Box {
-                                Row {
-                                    Text(
-                                        text = dayOfThisPair.name, modifier = Modifier.clickable {
-                                            expandedDaysOfWeekList = true
-                                        },
-                                        fontSize = thisExpandedFont4
-                                    )
-                                    TextHint("click")
-                                }
-                                DropdownMenu(
-                                    expanded = expandedDaysOfWeekList,
-                                    onDismissRequest = {
-                                        expandedDaysOfWeekList = false
-                                    },
-                                    modifier = Modifier.padding(4.dp)
-                                ) {
-                                    for (day in daysOfWeek) {
-                                        Row {
-                                            if (day == dayOfThisPair) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Done,
-                                                    contentDescription = "thisDayOfWeek"
-                                                )
-                                            } else {
-                                                Spacer(modifier = Modifier.width(25.dp))
-                                            }
-                                            Text(
-                                                text = day.name, modifier = Modifier.clickable {
-                                                    dayOfThisPair = day
-                                                    expandedDaysOfWeekList = false
-                                                },
-                                                fontSize = thisExpandedFont4
-                                            )
-                                            Spacer(modifier = Modifier.width(25.dp))
-                                        }
-                                    }
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Button(
-                                    onClick = { numAndDen = NumAndDen.Numerator },
-                                    enabled = (numAndDen != NumAndDen.Numerator),
-                                    modifier = Modifier,
-                                ) {
-                                    Text(text = "Числитель", fontSize = thisExpandedFont5)
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Button(
-                                    onClick = { numAndDen = NumAndDen.Every },
-                                    enabled = (numAndDen != NumAndDen.Every),
-                                    modifier = Modifier,
-                                ) {
-                                    Text(text = "Всегда", fontSize = thisExpandedFont5)
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Button(
-                                    onClick = { numAndDen = NumAndDen.Denominator },
-                                    enabled = (numAndDen != NumAndDen.Denominator),
-                                    modifier = Modifier,
-                                ) {
-                                    Text(text = "Знаменатель", fontSize = thisExpandedFont5)
-                                }
-                            }
-                        }
-                    }
-                    Column {
-                        IconButton(onClick = {
-                            if (isEditing) {
-                                pair.value.nameOfSubject = nameOfSubject
-                                pair.value.nameOfTeacher = nameOfTeacher
-                                pair.value.numberOfAud = numberOfAud
-                                pair.value.timeOfLesson.startTime = startTime
-                                pair.value.timeOfLesson.endTime = endTime
-                                pair.value.numeratorAndDenominator = numAndDen
-                                lessons.sort()
-                                writeDataByMutableMap()
-                                editingSome.value -= 1
-                            } else {
-                                editingSome.value += 1
-                            }
-                            isEditing = !isEditing
-                        }) {
-                            if (!isEditing) {
-                                Icon(Icons.Default.Edit, contentDescription = "IconEdit")
-                            } else {
-                                Icon(Icons.Default.Done, contentDescription = "IconDone")
-                            }
-                        }
-                        IconButton(onClick = {
-//                        if (lessons[pair.value.dayOfThisPair.value - 1].removeLesson(pair.value))
-//                            Toast.makeText(context, pair.toString(), Toast.LENGTH_LONG).show()
-                            removingLesson()
-                        }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete lesson")
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @SuppressLint("MutableCollectionMutableState")
@@ -501,8 +551,8 @@ class MainActivity : ComponentActivity() {
     ) {
         LocalContext.current
         var text by remember { mutableStateOf("") }
-        var sub by remember {
-            mutableStateOf(lessons)
+        var lessons = remember {
+            mutableStateListOf(*(readData().toTypedArray()))
         }
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -523,11 +573,10 @@ class MainActivity : ComponentActivity() {
                 )
                 Button(
                     onClick = {
-                        lessons = getSubjectsFromListString(text.split("\n"))
-                        sub = lessons
+                        lessons =
+                            mutableStateListOf(*(getSubjectsFromListString(text.split("\n")).toTypedArray()))
                         text = ""
-//                    writeText(text)
-                        writeDataByMutableMap()
+                        writeDataToFile(lessons)
 
                     }, enabled = text.isNotEmpty()
                 ) {
@@ -548,7 +597,9 @@ class MainActivity : ComponentActivity() {
         onClickToScreen3: () -> Unit,
     ) {
         val context = LocalContext.current
-
+        val lessons = remember {
+            mutableStateListOf(*(readData().toTypedArray()))
+        }
         var time by remember {
             mutableStateOf(
                 LocalTime.now()
@@ -686,7 +737,7 @@ class MainActivity : ComponentActivity() {
                                                     isExpanded = false
                                                 })
                                             if (daysOfWeek[i] == localDateTime.dayOfWeek) {
-                                               TextHint(text = "today")
+                                                TextHint(text = "today")
                                             }
                                         }
                                     }
@@ -789,18 +840,6 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun Lesson.GetNextLessonForSchedule() {
-        Card(
-            modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                containerColor = colorOfThisPair
-            )
-        ) {
-            GetStringForSchedule(colorOfAllPairs)
-        }
-    }
-
-
-    @Composable
     fun Lesson.GetStringForSchedule(colorBack: Color) {
         if (nameOfSubject != "") {
             var maxInfo by remember {
@@ -866,7 +905,7 @@ class MainActivity : ComponentActivity() {
 //        Log.e("MyLog", "writeText = $text")
 //    }
 
-    private fun writeDataByMutableMap() {
+    private fun writeDataToFile(lessons: MutableList<Lesson>) {
         try {
             val file = File(this.getExternalFilesDir(null), fileBaseName)
             file.writeText("")

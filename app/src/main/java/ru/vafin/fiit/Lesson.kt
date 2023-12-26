@@ -3,14 +3,13 @@ package ru.vafin.fiit
 import android.util.Log
 import java.time.DayOfWeek
 
-class Lesson(
+data class Lesson(
     var dayOfThisPair: DayOfWeek,
     var nameOfSubject: String,
     var numberOfAud: String,
     var timeOfLesson: TimeOfLesson,
     var nameOfTeacher: String,
     var numeratorAndDenominator: NumAndDen,
-
     ) : Comparable<Lesson> {
     override fun toString(): String {
         return "|$dayOfThisPair, $nameOfSubject, $numberOfAud, $timeOfLesson, $nameOfTeacher, ${numeratorAndDenominator.name}|"
