@@ -63,7 +63,6 @@ class MainActivity : ComponentActivity() {
     private val screen1 = "screen_1"
     private val screen2 = "screen_2"
     private val screen3 = "screen_3"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -789,7 +788,6 @@ class MainActivity : ComponentActivity() {
         onClickToScreen2: () -> Unit,
         onClickToScreen3: () -> Unit,
     ) {
-        val context = LocalContext.current
         val lessons = remember {
             mutableStateListOf(*(readData(this).toTypedArray()))
         }
@@ -1015,7 +1013,11 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .clickable {
-                                        idImage = listik[Random.nextInt(listik.size)]
+                                        var rand = listik[Random.nextInt(listik.size)]
+                                        while (rand == idImage) {
+                                            rand = listik[Random.nextInt(listik.size)]
+                                        }
+                                        idImage = rand
                                     }
                             )
                         }
@@ -1027,22 +1029,6 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-    }
-
-
-    private fun getNumberOfSemester(): Int {
-//    var oneSemRange = listOf(8, 9, 10, 11, 12)
-        val twoSemRange = listOf(2, 3, 4, 5, 6, 7, 8)
-        var cource = localDateTime.year - 2022
-        val semester: Int
-        if (localDateTime.month.value !in twoSemRange) {
-            cource += 1
-            semester = 1
-        } else {
-            semester = 2
-        }
-
-        return (cource - 1) * 2 + semester
     }
 
 }

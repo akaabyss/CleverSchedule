@@ -31,7 +31,7 @@ fun readData(context: Context): MutableList<Lesson> {
         Log.e("MyLog", "readData = $listWithPairs")
         return getSubjectsFromListString(listWithPairs)
     } catch (e: Exception) {
-        Toast.makeText(context, "ERROR READING LOCAL DATABASE", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(context, "ERROR READING LOCAL DATABASE", Toast.LENGTH_SHORT).show()
     }
     return mutableListOf()
 }
