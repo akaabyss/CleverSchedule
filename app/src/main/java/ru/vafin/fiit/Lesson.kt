@@ -1,6 +1,28 @@
 package ru.vafin.fiit
 
-import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import ru.vafin.fiit.ui.theme.colorOfText
 import java.time.DayOfWeek
 
 data class Lesson(
@@ -42,26 +64,50 @@ fun String.fromStringToLessonObject(): Lesson {
     )
 }
 
-
-fun MutableList<MutableList<Lesson>>.removeLesson(lesson: Lesson) {
-    Log.e("removeLesson", "leson to remove = ${lesson.toFileString()}")
-    this[lesson.dayOfThisPair.value - 1].forEach {
-        Log.e("removeLesson", "leson it = ${it.toFileString()}")
-        if (lesson.toFileString() == it.toFileString()) {
-            this[lesson.dayOfThisPair.value - 1].remove(it)
-            Log.e("removeLesson", "removed = ${it.toFileString()}")
-            Log.e("removeLesson", "остальное  = ${this}")
+@Composable
+fun Lesson.GetStringForSchedule(colorBack: Color) {
+    if (nameOfSubject != "") {
+        var maxInfo by remember {
+            mutableStateOf(false)
         }
-    }
-}
-
-fun MutableList<MutableList<Lesson>>.sortedLessons() {
-    for (day in daysOfWeek) {
-        val lessonsInThisDay = this[day.value - 1]
-        if (lessonsInThisDay.size != 0) {
-//                subjects?.set(day, lessonsInThisDay?.sorted())
-            lessonsInThisDay.sort()
-            this[day.value - 1] = lessonsInThisDay
+        if (numeratorAndDenominator == weekOfYear || numeratorAndDenominator == NumAndDen.Every) {
+            Row(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .background(colorBack),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(65.dp)
+                        .weight(1f)
+                ) {
+                    Text(text = timeOfLesson.getTime(), fontSize = 18.sp)
+                }
+                Spacer(modifier = Modifier.width(5.dp))
+                Column(
+                    modifier = Modifier.weight(4f)
+                ) {
+                    Text(text = nameOfSubject, color = colorOfText, fontSize = 20.sp)
+                    Text(
+                        text = numberOfAud, color = colorOfText, fontSize = 17.sp
+                    )
+                    if (maxInfo) {
+                        Text(text = "Препод: $nameOfTeacher", fontSize = 17.sp)
+                    }
+                }
+                if (nameOfTeacher != "") {
+                    IconButton(
+                        onClick = {
+                            maxInfo = !maxInfo
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Filled.Info, contentDescription = "Info")
+                    }
+                }
+            }
         }
     }
 }
