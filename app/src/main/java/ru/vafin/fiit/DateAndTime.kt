@@ -6,7 +6,7 @@ import java.time.LocalTime
 import java.util.Calendar
 
 fun getDayOfWeekByStringWithName(str: String): DayOfWeek {
-    return when (str) {
+    return when (str.uppercase()) {
         DayOfWeek.MONDAY.name -> DayOfWeek.MONDAY
         DayOfWeek.TUESDAY.name -> DayOfWeek.TUESDAY
         DayOfWeek.WEDNESDAY.name -> DayOfWeek.WEDNESDAY

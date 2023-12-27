@@ -34,7 +34,7 @@ data class Lesson(
     var numeratorAndDenominator: NumAndDen,
     ) : Comparable<Lesson> {
     override fun toString(): String {
-        return "|$dayOfThisPair, $nameOfSubject, $numberOfAud, $timeOfLesson, $nameOfTeacher, ${numeratorAndDenominator.name}|"
+        return "|${dayOfThisPair.name.toDefaultString()}, $nameOfSubject, $numberOfAud, $timeOfLesson, $nameOfTeacher, ${numeratorAndDenominator.name}|"
     }
 
     override fun compareTo(other: Lesson): Int {
@@ -44,7 +44,7 @@ data class Lesson(
     }
 
     fun toFileString(): String {
-        return "${dayOfThisPair.name}, $nameOfSubject, $numberOfAud, ${timeOfLesson.toFileString()}, " + "$nameOfTeacher, ${
+        return "${dayOfThisPair.name.toDefaultString()}, $nameOfSubject, $numberOfAud, ${timeOfLesson.toFileString()}, " + "$nameOfTeacher, ${
             getStringWithNameByNumOrDen(
                 numeratorAndDenominator
             )

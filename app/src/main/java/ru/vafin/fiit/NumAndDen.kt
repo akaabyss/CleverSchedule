@@ -5,7 +5,7 @@ enum class NumAndDen {
 }
 
 fun getNumOrDenByStringWithName(str: String): NumAndDen {
-    return when (str) {
+    return when (str.toDefaultString()) {
         "Числитель" -> NumAndDen.Numerator
         "Знаменатель" -> NumAndDen.Denominator
         else -> NumAndDen.Every

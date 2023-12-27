@@ -434,10 +434,11 @@ fun EditScreen(
                         }
                     }
                 }
+
                 if (editingSome.intValue == 0) {
                     FloatingActionButton(
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
+                            .align(Alignment.BottomEnd)
                             .padding(10.dp),
                         onClick = { adding = true },
 //                            contentColor = mainColor,
