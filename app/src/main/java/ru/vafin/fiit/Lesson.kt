@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,7 @@ data class Lesson(
     var timeOfLesson: TimeOfLesson,
     var nameOfTeacher: String,
     var numeratorAndDenominator: NumAndDen,
-    ) : Comparable<Lesson> {
+) : Comparable<Lesson> {
     override fun toString(): String {
         return "|${dayOfThisPair.name.toDefaultString()}, $nameOfSubject, $numberOfAud, $timeOfLesson, $nameOfTeacher, ${numeratorAndDenominator.name}|"
     }
@@ -76,7 +77,8 @@ fun Lesson.GetStringForSchedule(colorBack: Color) {
                     .padding(10.dp)
                     .fillMaxWidth()
                     .background(colorBack),
-                horizontalArrangement = Arrangement.SpaceAround
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
                     modifier = Modifier
