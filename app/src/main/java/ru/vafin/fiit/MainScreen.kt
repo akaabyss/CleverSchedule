@@ -241,7 +241,7 @@ fun MainScreen(
                 if (lessonsOfThisDay.isNotEmpty()) {
                     for (indexOfLesson in 0..lessonsOfThisDay.lastIndex) {
                         val thisLesson = lessonsOfThisDay[indexOfLesson]
-                        if (thisLesson.timeOfLesson.timeVnutri(time)) {
+                        if (thisLesson.timeOfLesson.timeVnutri(time) && thisLesson.dayOfThisPair == localDateTime.dayOfWeek) {
                             thisLesson.GetStringForSchedule(colorOfThisPair)
                         } else {
                             thisLesson.GetStringForSchedule(colorOfAllPairs)
