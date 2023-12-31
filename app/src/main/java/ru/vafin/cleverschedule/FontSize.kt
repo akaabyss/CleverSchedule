@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.cleverschedule
 
 import androidx.compose.ui.unit.sp
 

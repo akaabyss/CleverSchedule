@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.cleverschedule
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -6,9 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ru.vafin.fiit.screens.EditScreen
-import ru.vafin.fiit.screens.MainScreen
-import ru.vafin.fiit.screens.ScreenWithPickData
+import ru.vafin.cleverschedule.screens.EditScreen
+import ru.vafin.cleverschedule.screens.MainScreen
+import ru.vafin.cleverschedule.screens.ScreenWithPickData
 
 class MainActivity : ComponentActivity() {
     private val mainScreen = "screen_1"

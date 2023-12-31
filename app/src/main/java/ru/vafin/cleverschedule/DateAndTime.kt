@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.cleverschedule
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime

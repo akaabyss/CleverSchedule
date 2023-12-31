@@ -1,4 +1,4 @@
-package ru.vafin.fiit.screens
+package ru.vafin.cleverschedule.screens
 
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
@@ -40,18 +40,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.vafin.fiit.BottomBar
-import ru.vafin.fiit.FontSize
-import ru.vafin.fiit.Lesson
-import ru.vafin.fiit.NumAndDen
-import ru.vafin.fiit.TimeOfLesson
-import ru.vafin.fiit.daysOfWeek
-import ru.vafin.fiit.getStringWithNameByNumOrDen
-import ru.vafin.fiit.readData
-import ru.vafin.fiit.toShortString
-import ru.vafin.fiit.ui.theme.colorOfAllPairs
-import ru.vafin.fiit.ui.theme.mainColor
-import ru.vafin.fiit.writeDataToFile
+import ru.vafin.cleverschedule.BottomBar
+import ru.vafin.cleverschedule.FontSize
+import ru.vafin.cleverschedule.Lesson
+import ru.vafin.cleverschedule.NumAndDen
+import ru.vafin.cleverschedule.TimeOfLesson
+import ru.vafin.cleverschedule.daysOfWeek
+import ru.vafin.cleverschedule.getStringWithNameByNumOrDen
+import ru.vafin.cleverschedule.readData
+import ru.vafin.cleverschedule.toShortString
+import ru.vafin.cleverschedule.ui.theme.colorOfAllPairs
+import ru.vafin.cleverschedule.ui.theme.mainColor
+import ru.vafin.cleverschedule.writeDataToFile
 import java.time.DayOfWeek
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,6 +88,9 @@ fun EditScreen(
                 IconButton(onClick = {
                     permissionForRemoving = !permissionForRemoving
                 }) {
+                    if (lessonsMutableState.size == 0) {
+                        permissionForRemoving = false
+                    }
                     if (permissionForRemoving) {
                         Icon(imageVector = Icons.Filled.Done,
                             contentDescription = "remove permission for remove",
@@ -136,6 +139,7 @@ fun EditScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ) {
+
                                 if (!isEditing && permissionForRemoving) {
                                     IconButton(onClick = {
                                         lessonsMutableState.remove(lesson)

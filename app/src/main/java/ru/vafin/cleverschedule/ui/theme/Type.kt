@@ -1,4 +1,4 @@
-package ru.vafin.fiit.ui.theme
+package ru.vafin.cleverschedule.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.cleverschedule
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.BottomNavigation
@@ -11,7 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ru.vafin.fiit.ui.theme.mainColor
+import ru.vafin.cleverschedule.ui.theme.mainColor
 
 @Composable
 fun BottomBar(

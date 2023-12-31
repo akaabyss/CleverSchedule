@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.cleverschedule
 
 enum class NumAndDen {
     Every, Numerator, Denominator,

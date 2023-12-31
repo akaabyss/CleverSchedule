@@ -1,4 +1,4 @@
-package ru.vafin.fiit.screens
+package ru.vafin.cleverschedule.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,19 +38,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.vafin.fiit.BottomBar
-import ru.vafin.fiit.GetStringForSchedule
-import ru.vafin.fiit.NumAndDen
-import ru.vafin.fiit.R
-import ru.vafin.fiit.TextHint
-import ru.vafin.fiit.daysOfWeek
-import ru.vafin.fiit.getTimeString
-import ru.vafin.fiit.localDateTime
-import ru.vafin.fiit.readData
-import ru.vafin.fiit.ui.theme.colorOfAllPairs
-import ru.vafin.fiit.ui.theme.colorOfThisPair
-import ru.vafin.fiit.ui.theme.mainColor
-import ru.vafin.fiit.weekOfYear
+import ru.vafin.cleverschedule.BottomBar
+import ru.vafin.cleverschedule.GetStringForSchedule
+import ru.vafin.cleverschedule.NumAndDen
+import ru.vafin.cleverschedule.R
+import ru.vafin.cleverschedule.TextHint
+import ru.vafin.cleverschedule.daysOfWeek
+import ru.vafin.cleverschedule.getTimeString
+import ru.vafin.cleverschedule.localDateTime
+import ru.vafin.cleverschedule.readData
+import ru.vafin.cleverschedule.ui.theme.colorOfAllPairs
+import ru.vafin.cleverschedule.ui.theme.colorOfThisPair
+import ru.vafin.cleverschedule.ui.theme.mainColor
+import ru.vafin.cleverschedule.weekOfYear
 import java.time.LocalTime
 import kotlin.random.Random
 
@@ -60,7 +60,6 @@ fun MainScreen(
     clickToScreenWithPickData: () -> Unit,
     clickToEditScreen: () -> Unit,
 ) {
-
 
     val context = LocalContext.current
     val lessons = remember {

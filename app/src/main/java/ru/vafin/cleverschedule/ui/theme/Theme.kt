@@ -1,4 +1,4 @@
-package ru.vafin.fiit.ui.theme
+package ru.vafin.cleverschedule.ui.theme
 
 import android.app.Activity
 import android.os.Build
