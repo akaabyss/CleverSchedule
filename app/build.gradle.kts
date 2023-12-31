@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "ru.vafin.fiit"
+    namespace = "ru.vafin.cleverschedule"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ru.vafin.fiit"
+        applicationId = "ru.vafin.cleverschedule"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
