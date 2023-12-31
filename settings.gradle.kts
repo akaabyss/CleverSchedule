@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FIIT"
+rootProject.name = "Clever schedule"
 include(":app")

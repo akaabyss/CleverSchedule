@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.fiit.screens
 
 import android.annotation.SuppressLint
 import android.content.ClipData
@@ -27,15 +27,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.vafin.fiit.BottomBar
+import ru.vafin.fiit.Lesson
+import ru.vafin.fiit.getLessonsFromListString
+import ru.vafin.fiit.readData
 import ru.vafin.fiit.ui.theme.mainColor
+import ru.vafin.fiit.writeDataToFile
 
 @SuppressLint("MutableCollectionMutableState", "ServiceCast")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenWithPickData(
-    onClickToScreen1: () -> Unit,
-    onClickToScreen2: () -> Unit,
-    onClickToScreen3: () -> Unit,
+    clickToMainScreen: () -> Unit,
+    clickToEditScreen: () -> Unit,
 ) {
     val context = LocalContext.current
     var text by remember { mutableStateOf("") }
@@ -81,7 +85,8 @@ fun ScreenWithPickData(
                     for (lesson in readData(context)) {
                         textForCopy += lesson.toFileString() + "\n"
                     }
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clipboard =
+                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     val clip = ClipData.newPlainText("label", textForCopy)
                     clipboard.setPrimaryClip(clip)
                 }
@@ -102,7 +107,9 @@ fun ScreenWithPickData(
             }
         }
         BottomBar(
-            onClickToScreen1, onClickToScreen2, onClickToScreen3, selected2 = true
+            clickToMainScreen = clickToMainScreen,
+            clickToEditScreen = clickToEditScreen,
+            selected2 = true
         )
     }
 

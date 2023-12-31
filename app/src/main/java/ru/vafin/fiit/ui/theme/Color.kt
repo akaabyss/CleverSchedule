@@ -14,4 +14,3 @@ val mainColor = Color(0xFF9FE778)
 var colorOfThisPair = Color(0xFF9FE778)
 val colorOfAllPairs = Color.LightGray
 val colorOfText = Color.Black
-val Color.mainColor get() = Color(0xFF9FE778)

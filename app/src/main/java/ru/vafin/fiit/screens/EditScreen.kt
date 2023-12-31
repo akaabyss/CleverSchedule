@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.fiit.screens
 
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
@@ -40,17 +40,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.vafin.fiit.BottomBar
+import ru.vafin.fiit.FontSize
+import ru.vafin.fiit.Lesson
+import ru.vafin.fiit.NumAndDen
+import ru.vafin.fiit.TimeOfLesson
+import ru.vafin.fiit.daysOfWeek
+import ru.vafin.fiit.getStringWithNameByNumOrDen
+import ru.vafin.fiit.readData
+import ru.vafin.fiit.toShortString
 import ru.vafin.fiit.ui.theme.colorOfAllPairs
 import ru.vafin.fiit.ui.theme.mainColor
+import ru.vafin.fiit.writeDataToFile
 import java.time.DayOfWeek
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun EditScreen(
-    onClickToScreen1: () -> Unit,
-    onClickToScreen2: () -> Unit,
-    onClickToScreen3: () -> Unit,
+    clickToMainScreen: () -> Unit,
+    clickToScreenWithPickData: () -> Unit,
 ) {
     val context = LocalContext.current
     val lessonsMutableState = remember {
@@ -65,7 +74,6 @@ fun EditScreen(
     var permissionForRemoving by remember {
         mutableStateOf(false)
     }
-
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -295,13 +303,12 @@ fun EditScreen(
 
                                                     fontSize = FontSize.big
                                                 )
-                                                if(expandedDaysOfWeekList) {
+                                                if (expandedDaysOfWeekList) {
                                                     Icon(
                                                         imageVector = Icons.Filled.ExpandLess,
                                                         contentDescription = "expandLess"
                                                     )
-                                                }
-                                                else{
+                                                } else {
                                                     Icon(
                                                         imageVector = Icons.Filled.ExpandMore,
                                                         contentDescription = "expandMore"
@@ -718,8 +725,11 @@ fun EditScreen(
             }
         }
         BottomBar(
-            onClickToScreen1, onClickToScreen2, onClickToScreen3, selected3 = true
+            clickToMainScreen = clickToMainScreen,
+            clickToScreenWithPickData = clickToScreenWithPickData,
+            selected3 = true
         )
     }
 
 }
+

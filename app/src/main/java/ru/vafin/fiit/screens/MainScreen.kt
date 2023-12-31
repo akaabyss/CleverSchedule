@@ -1,4 +1,4 @@
-package ru.vafin.fiit
+package ru.vafin.fiit.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,19 +38,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.vafin.fiit.BottomBar
+import ru.vafin.fiit.GetStringForSchedule
+import ru.vafin.fiit.NumAndDen
+import ru.vafin.fiit.R
+import ru.vafin.fiit.TextHint
+import ru.vafin.fiit.daysOfWeek
+import ru.vafin.fiit.getTimeString
+import ru.vafin.fiit.localDateTime
+import ru.vafin.fiit.readData
 import ru.vafin.fiit.ui.theme.colorOfAllPairs
 import ru.vafin.fiit.ui.theme.colorOfThisPair
 import ru.vafin.fiit.ui.theme.mainColor
+import ru.vafin.fiit.weekOfYear
 import java.time.LocalTime
 import kotlin.random.Random
 
 @OptIn(ExperimentalStdlibApi::class)
 @Composable
 fun MainScreen(
-    onClickToScreen1: () -> Unit,
-    onClickToScreen2: () -> Unit,
-    onClickToScreen3: () -> Unit,
+    clickToScreenWithPickData: () -> Unit,
+    clickToEditScreen: () -> Unit,
 ) {
+
+
     val context = LocalContext.current
     val lessons = remember {
         mutableStateListOf(*(readData(context).toTypedArray()))
@@ -289,7 +300,9 @@ fun MainScreen(
         }
 
         BottomBar(
-            onClickToScreen1, onClickToScreen2, onClickToScreen3, selected1 = true
+            clickToScreenWithPickData = clickToScreenWithPickData,
+            clickToEditScreen = clickToEditScreen,
+            selected1 = true
         )
     }
 

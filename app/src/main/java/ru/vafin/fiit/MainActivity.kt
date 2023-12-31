@@ -6,11 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ru.vafin.fiit.screens.EditScreen
+import ru.vafin.fiit.screens.MainScreen
+import ru.vafin.fiit.screens.ScreenWithPickData
 
 class MainActivity : ComponentActivity() {
-    private val screen1 = "screen_1"
-    private val screen2 = "screen_2"
-    private val screen3 = "screen_3"
+    private val mainScreen = "screen_1"
+    private val screenWithPickData = "screen_2"
+    private val editScreen = "screen_3"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -19,37 +22,39 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             NavHost(
-                navController = navController, startDestination = screen1
+                navController = navController, startDestination = mainScreen
             ) {
-                composable(screen1) {
-                    MainScreen({
-                        navController.navigate(screen1)
-                    }, {
-                        navController.navigate(screen2)
-                    }, {
-                        navController.navigate(screen3)
-                    })
+                composable(mainScreen) {
+                    MainScreen(
+                        clickToScreenWithPickData = { navController.navigate(screenWithPickData) },
+                        clickToEditScreen = { navController.navigate(editScreen) },
+                    )
                 }
-                composable(screen2) {
-                    ScreenWithPickData({
-                        navController.navigate(screen1)
-                    }, {
-                        navController.navigate(screen2)
-                    }, {
-                        navController.navigate(screen3)
-                    })
+                composable(screenWithPickData) {
+                    ScreenWithPickData(
+                        clickToMainScreen = {
+                            navController.popBackStack()
+                            navController.popBackStack()
+                            navController.navigate(mainScreen)
+                        }, clickToEditScreen = {
+                            navController.popBackStack()
+                            navController.navigate(editScreen)
+                        }
+                    )
                 }
-                composable(screen3) {
-                    EditScreen({
-                        navController.navigate(screen1)
-                    }, {
-                        navController.navigate(screen2)
-                    }, {
-                        navController.navigate(screen3)
-                    })
+                composable(editScreen) {
+                    EditScreen(
+                        clickToMainScreen = {
+                            navController.popBackStack()
+                            navController.popBackStack()
+                            navController.navigate(mainScreen)
+                        }, clickToScreenWithPickData = {
+                            navController.popBackStack()
+                            navController.navigate(screenWithPickData)
+                        }
+                    )
                 }
             }
-
         }
     }
 

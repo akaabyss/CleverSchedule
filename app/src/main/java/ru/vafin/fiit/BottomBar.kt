@@ -15,9 +15,9 @@ import ru.vafin.fiit.ui.theme.mainColor
 
 @Composable
 fun BottomBar(
-    onClickToScreen1: () -> Unit,
-    onClickToScreen2: () -> Unit,
-    onClickToScreen3: () -> Unit,
+    clickToMainScreen: () -> Unit = {},
+    clickToScreenWithPickData: () -> Unit = {},
+    clickToEditScreen: () -> Unit = {},
     selected1: Boolean = false,
     selected2: Boolean = false,
     selected3: Boolean = false,
@@ -27,11 +27,13 @@ fun BottomBar(
         backgroundColor = mainColor,
         contentColor = Color.Black
     ) {
+
         BottomNavigationItem(
             icon = { Icon(Icons.Default.Home, contentDescription = "Icon1") },
             selected = selected1,
             onClick = {
-                onClickToScreen1()
+
+                clickToMainScreen()
             },
             enabled = !selected1,
         )
@@ -40,7 +42,8 @@ fun BottomBar(
             icon = { Icon(Icons.Default.UploadFile, contentDescription = "Icon2") },
             selected = selected2,
             onClick = {
-                onClickToScreen2()
+
+                clickToScreenWithPickData()
             },
             enabled = !selected2,
         )
@@ -49,7 +52,8 @@ fun BottomBar(
             icon = { Icon(Icons.Default.List, contentDescription = "Icon3") },
             selected = selected3,
             onClick = {
-                onClickToScreen3()
+
+                clickToEditScreen()
             },
             enabled = !selected3,
         )
