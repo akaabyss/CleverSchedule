@@ -60,7 +60,7 @@ fun ScreenWithPickData(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Выгрузить список пар",
+                    text = "Update local database",
                     fontSize = 22.sp
                 )
             }

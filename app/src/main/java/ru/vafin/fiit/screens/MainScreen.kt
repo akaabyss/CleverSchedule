@@ -270,7 +270,7 @@ fun MainScreen(
                             fontSize = 20.sp
                         )
                         Text(
-                            text = "тыкай по экрану",
+                            text = "тыкай на котика",
                             fontSize = 20.sp
                         )
                     }
