@@ -37,15 +37,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ru.vafin.cleverschedule.BottomBar
 import ru.vafin.cleverschedule.GetStringForSchedule
 import ru.vafin.cleverschedule.NumAndDen
 import ru.vafin.cleverschedule.R
 import ru.vafin.cleverschedule.TextHint
 import ru.vafin.cleverschedule.daysOfWeek
+import ru.vafin.cleverschedule.editScreen
 import ru.vafin.cleverschedule.getTimeString
 import ru.vafin.cleverschedule.localDateTime
 import ru.vafin.cleverschedule.readData
+import ru.vafin.cleverschedule.screenWithPickData
 import ru.vafin.cleverschedule.ui.theme.colorOfAllPairs
 import ru.vafin.cleverschedule.ui.theme.colorOfThisPair
 import ru.vafin.cleverschedule.ui.theme.mainColor
@@ -56,8 +59,7 @@ import kotlin.random.Random
 @OptIn(ExperimentalStdlibApi::class)
 @Composable
 fun MainScreen(
-    clickToScreenWithPickData: () -> Unit,
-    clickToEditScreen: () -> Unit,
+    navController:NavController
 ) {
 
     val context = LocalContext.current
@@ -314,8 +316,8 @@ fun MainScreen(
         }
 
         BottomBar(
-            clickToScreenWithPickData = clickToScreenWithPickData,
-            clickToEditScreen = clickToEditScreen,
+            clickToScreenWithPickData = { navController.navigate(screenWithPickData) },
+            clickToEditScreen = { navController.navigate(editScreen) },
             selected1 = true
         )
     }

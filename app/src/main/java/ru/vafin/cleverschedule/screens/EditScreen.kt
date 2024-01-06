@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ru.vafin.cleverschedule.BottomBar
 import ru.vafin.cleverschedule.FontSize
 import ru.vafin.cleverschedule.Lesson
@@ -47,7 +48,9 @@ import ru.vafin.cleverschedule.NumAndDen
 import ru.vafin.cleverschedule.TimeOfLesson
 import ru.vafin.cleverschedule.daysOfWeek
 import ru.vafin.cleverschedule.getStringWithNameByNumOrDen
+import ru.vafin.cleverschedule.mainScreen
 import ru.vafin.cleverschedule.readData
+import ru.vafin.cleverschedule.screenWithPickData
 import ru.vafin.cleverschedule.toShortString
 import ru.vafin.cleverschedule.ui.theme.colorOfAllPairs
 import ru.vafin.cleverschedule.ui.theme.mainColor
@@ -58,8 +61,7 @@ import java.time.DayOfWeek
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun EditScreen(
-    clickToMainScreen: () -> Unit,
-    clickToScreenWithPickData: () -> Unit,
+    navController: NavController,
 ) {
     val context = LocalContext.current
     val lessonsMutableState = remember {
@@ -729,8 +731,14 @@ fun EditScreen(
             }
         }
         BottomBar(
-            clickToMainScreen = clickToMainScreen,
-            clickToScreenWithPickData = clickToScreenWithPickData,
+            clickToMainScreen = {
+                navController.popBackStack()
+                navController.popBackStack()
+                navController.navigate(mainScreen)
+            }, clickToScreenWithPickData = {
+                navController.popBackStack()
+                navController.navigate(screenWithPickData)
+            },
             selected3 = true
         )
     }

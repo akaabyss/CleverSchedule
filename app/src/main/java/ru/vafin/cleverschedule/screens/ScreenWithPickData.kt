@@ -27,9 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ru.vafin.cleverschedule.BottomBar
 import ru.vafin.cleverschedule.Lesson
+import ru.vafin.cleverschedule.editScreen
 import ru.vafin.cleverschedule.getLessonsFromListString
+import ru.vafin.cleverschedule.mainScreen
 import ru.vafin.cleverschedule.readData
 import ru.vafin.cleverschedule.ui.theme.mainColor
 import ru.vafin.cleverschedule.writeDataToFile
@@ -38,8 +41,7 @@ import ru.vafin.cleverschedule.writeDataToFile
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenWithPickData(
-    clickToMainScreen: () -> Unit,
-    clickToEditScreen: () -> Unit,
+    navController: NavController,
 ) {
     val context = LocalContext.current
     var text by remember { mutableStateOf("") }
@@ -107,8 +109,14 @@ fun ScreenWithPickData(
             }
         }
         BottomBar(
-            clickToMainScreen = clickToMainScreen,
-            clickToEditScreen = clickToEditScreen,
+            clickToMainScreen = {
+                navController.popBackStack()
+                navController.popBackStack()
+                navController.navigate(mainScreen)
+            }, clickToEditScreen = {
+                navController.popBackStack()
+                navController.navigate(editScreen)
+            },
             selected2 = true
         )
     }
